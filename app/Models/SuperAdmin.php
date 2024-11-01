@@ -17,7 +17,7 @@ class SuperAdmin extends Model implements AuthenticatableContract
         'username',
         'email',
         'password',
-        'role',
+
     ];
 
     protected $hidden = [
