@@ -573,7 +573,9 @@
 
                 <div class="menu-section">
                     <div class="menu-section-title">Management</div>
-                    <a href="/registeradmin" class="menu-item">
+
+                    <a href="/registeradmin" class="menu-item"
+                        @if (auth()->user()->role !== 'super') style="display: none;" @endif>
                         <i class="fas fa-users"></i>
                         <span>Admin</span>
                     </a>
@@ -582,6 +584,7 @@
                         <span>Products</span>
                     </a> --}}
                     <a href="/matkul" class="menu-item">
+
                         <i class="fas fa-table"></i>
                         <span>Manajemen Jadwal</span>
                     </a>

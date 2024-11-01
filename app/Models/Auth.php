@@ -20,6 +20,7 @@ class Auth extends Authenticatable
         'nama',
         'email',
         'password',
+        'role',
     ];
 
     protected $hidden = [

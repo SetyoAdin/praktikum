@@ -112,7 +112,14 @@
                             <div class="invalid-feedback">Konfirmasi password wajib diisi.</div>
                         </div>
                     </div>
-
+                    <div class="col-md-6 mb-3">
+                        <select name="role" id="role" class="form-select" required>
+                            <option value="">Pilih Role</option>
+                            <option value="super">Super</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <div class="invalid-feedback">Role wajib diisi.</div>
+                    </div>
                     <form action="{{ route('register') }}" method="POST">
                         @csrf
                         <!-- Input fields -->
@@ -148,7 +155,8 @@
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Tutup</button>
                                     <button type="button" id="resetPasswordButton" class="btn btn-primary">Ubah
                                         Password</button>
                                 </div>

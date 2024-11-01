@@ -59,12 +59,14 @@ class AuthController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:auths',
             'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|string',
         ]);
 
         AuthModel::create([
             'nama' => $request->nama,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role, // Save the role to the AuthModel
         ]);
 
         return redirect()->route('registeradmin');
