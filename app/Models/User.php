@@ -46,8 +46,8 @@ class User extends Authenticatable
     }
     protected $table = 'auths'; // Atau gunakan nama tabel Anda
 
-    public function newQuery()
-    {
-        return parent::newQuery()->union(SuperAdmin::query());
-    }
+    //     public function newQuery()
+    //     {
+    //         return parent::newQuery()->union(SuperAdmin::query());
+    //     }
 }
