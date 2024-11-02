@@ -49,5 +49,6 @@ class User extends Authenticatable
     //     public function newQuery()
     //     {
     //         return parent::newQuery()->union(SuperAdmin::query());
+    //tes
     //     }
 }
