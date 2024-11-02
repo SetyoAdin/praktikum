@@ -584,9 +584,12 @@
                         <span>Products</span>
                     </a> --}}
                     <a href="/matkul" class="menu-item">
-
                         <i class="fas fa-table"></i>
                         <span>Manajemen Jadwal</span>
+                    </a>
+                    <a href="/mahasiswa" class="menu-item">
+                        <i class="fas fa-table"></i>
+                        <span>Data Mahasiswa</span>
                     </a>
                 </div>
 

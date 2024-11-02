@@ -7,10 +7,10 @@ use App\Models\Kelas;
 use App\Models\Tanggal;
 use App\Models\MataKuliah;
 use App\Models\Mahasiswa;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -135,5 +135,45 @@ class MahasiswaController extends Controller
     public function dashboard()
     {
         return view('admin.dashboard');
+    }
+    public function hapusmhs($id)
+    {
+        Log::info('Attempting to delete mahasiswa with ID: ' . $id);
+
+        try {
+            DB::beginTransaction();
+
+            $mahasiswa = Mahasiswa::find($id);
+            Log::info('Found mahasiswa:', ['mahasiswa' => $mahasiswa]);
+
+            if (!$mahasiswa) {
+                Log::warning('Mahasiswa not found with ID: ' . $id);
+                throw new ModelNotFoundException('Data mahasiswa tidak ditemukan');
+            }
+
+            $mahasiswa->delete();
+            Log::info('Successfully deleted mahasiswa with ID: ' . $id);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data mahasiswa berhasil dihapus'
+            ]);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            Log::error('Model not found exception: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Data mahasiswa tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Exception while deleting mahasiswa: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

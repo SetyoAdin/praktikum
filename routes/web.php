@@ -69,5 +69,6 @@ Route::delete('/hapus/{id_tanggal}', [TanggalController::class, 'hapusData'])->n
 Route::delete('/tanggal/{id}', [TanggalController::class, 'destroy'])->name('tanggal.destroy');
 Route::delete('/auth/{id}', [AuthController::class, 'destroy'])->name('auth.destroy');
 Route::delete('/jadwal/{id_tanggal}', [JadwalController::class, 'confirmDelete'])->name('jadwal.delete');
+Route::delete('/mahasiswa/{id}', [MahasiswaController::class, 'hapusmhs'])->name('mahasiswa.hapus');
 Route::delete('/tanggal/{id}', [TanggalController::class, 'destroy'])
     ->name('tanggal.destroy');
