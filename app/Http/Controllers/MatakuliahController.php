@@ -16,6 +16,7 @@ class MataKuliahController extends Controller
         $mata_kuliahs = MataKuliah::all();
         $jadwals = Jadwal::all();
         $tanggals = Tanggal::all();
+
         return view('admin.matkul', compact('mata_kuliahs', 'jadwals', 'tanggals'));
     }
 

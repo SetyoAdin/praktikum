@@ -13,7 +13,7 @@ class Tanggal extends Model
     protected $fillable = ['id_mata_kuliah', 'tanggal'];
     protected $primaryKey = 'id_tanggal';
 
-    public function mataKuliah()
+    public function mata_kuliah()
     {
         return $this->belongsTo(MataKuliah::class, 'id_mata_kuliah');
     }

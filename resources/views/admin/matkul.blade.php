@@ -196,7 +196,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="button" class="icon-button delete-btn"
-                                                onclick="confirmDelete({{ $matkul->id_mata_kuliah }})">
+                                                onclick="showDeleteConfirmation({{ $matkul->id_mata_kuliah }})">
                                                 <i class="fas fa-trash-alt trash-icon"></i>
                                             </button>
                                         </form>
@@ -206,10 +206,10 @@
                                             <i class="fas fa-pencil-alt edit-icon"></i>
                                         </a>
 
-                                        <a href="javascript:void(0);" class="icon-button"
+                                        {{-- <a href="javascript:void(0);" class="icon-button"
                                             onclick="displayMataKuliahModal()">
                                             <i class="fas fa-eye" style="color: blue"></i>
-                                        </a>
+                                        </a> --}}
                                     </td>
                                 </tr>
                                 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
@@ -267,6 +267,7 @@
                         <thead>
                             <tr>
                                 <th>No</th>
+
                                 <th>Tanggal</th>
                                 <th></th>
                             </tr>
@@ -277,14 +278,15 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ \Carbon\Carbon::parse($tanggal->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                                     </td>
+                                    </td>
                                     <td>
-                                        <form id="delete-form-{{ $matkul->id_mata_kuliah }}" class="delete-form"
-                                            data-id="{{ $matkul->id_mata_kuliah }}" onsubmit="return false;"
+                                        <form id="delete-form-{{ $tanggal->id_tanggal }}" class="delete-form"
+                                            data-id="{{ $tanggal->id_tanggal }}" onsubmit="return false;"
                                             style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button class="icon-button" type="button"
-                                                onclick="confirmDelete({{ $matkul->id_mata_kuliah }})">
+                                                onclick="confirmDeleteTanggal({{ $tanggal->id_tanggal }})">
                                                 <i class="fas fa-trash-alt trash-icon"></i>
                                             </button>
                                         </form>
@@ -321,47 +323,51 @@
                                                     $sesiJadwals = $jadwals->where('id_tanggal', $tanggal->id_tanggal);
                                                 @endphp
 
-                                                <form id="deleteForm{{ $tanggal->id_tanggal }}">
-                                                    @foreach ($sesiJadwals as $jadwal)
-                                                        <div class="sesi-container mb-4">
-                                                            <div class="d-flex justify-content-between align-items-start">
-                                                                <h4 class="mb-3">Sesi {{ $jadwal->sesi }}</h4>
-                                                                <div class="checkbox-container" style="display: none;">
-                                                                    <input type="checkbox"
-                                                                        class="form-check-input delete-checkbox"
-                                                                        name="delete_sesi[]"
-                                                                        value="{{ $jadwal->id_jadwal }}"
-                                                                        data-modal-id="{{ $tanggal->id_tanggal }}">
-                                                                </div>
-                                                            </div>
-                                                            <div class="row mb-2">
-                                                                <div class="col-md-4">Waktu Mulai</div>
-                                                                <div class="col-md-5">:
-                                                                    {{ \Carbon\Carbon::parse($jadwal->waktu_mulai)->format('H:i') }}
-                                                                </div>
-                                                            </div>
-                                                            <div class="row mb-2">
-                                                                <div class="col-md-4">Waktu Selesai</div>
-                                                                <div class="col-md-5">:
-                                                                    {{ \Carbon\Carbon::parse($jadwal->waktu_selesai)->format('H:i') }}
-                                                                </div>
-                                                            </div>
-                                                            <div class="row mb-2">
-                                                                <div class="col-md-4">Kuota</div>
-                                                                <div class="col-md-5">: {{ $jadwal->kuota }}</div>
-                                                            </div>
-                                                        </div>
-
-                                                        @if (!$loop->last)
-                                                            <hr class="my-4">
-                                                        @endif
-                                                    @endforeach
-                                                </form>
-
                                                 @if ($sesiJadwals->isEmpty())
-                                                    <div class="alert alert-info">
-                                                        Belum ada sesi yang tersedia untuk tanggal ini.
+                                                    <div class="d-flex justify-content-center align-items-center"
+                                                        style="min-height: 200px;">
+                                                        <div class="alert alert-info text-center w-75">
+                                                            Belum ada sesi yang tersedia untuk tanggal ini.
+                                                        </div>
                                                     </div>
+                                                @else
+                                                    <form id="deleteForm{{ $tanggal->id_tanggal }}">
+                                                        @foreach ($sesiJadwals as $jadwal)
+                                                            <div class="sesi-container mb-4">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-start">
+                                                                    <h4 class="mb-3">Sesi {{ $jadwal->sesi }}</h4>
+                                                                    <div class="checkbox-container"
+                                                                        style="display: none;">
+                                                                        <input type="checkbox"
+                                                                            class="form-check-input delete-checkbox"
+                                                                            name="delete_sesi[]"
+                                                                            value="{{ $jadwal->id_jadwal }}"
+                                                                            data-modal-id="{{ $tanggal->id_tanggal }}">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mb-2">
+                                                                    <div class="col-md-4">Waktu Mulai</div>
+                                                                    <div class="col-md-5">:
+                                                                        {{ \Carbon\Carbon::parse($jadwal->waktu_mulai)->format('H:i') }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mb-2">
+                                                                    <div class="col-md-4">Waktu Selesai</div>
+                                                                    <div class="col-md-5">:
+                                                                        {{ \Carbon\Carbon::parse($jadwal->waktu_selesai)->format('H:i') }}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mb-2">
+                                                                    <div class="col-md-4">Kuota</div>
+                                                                    <div class="col-md-5">: {{ $jadwal->kuota }}</div>
+                                                                </div>
+                                                            </div>
+                                                            @if (!$loop->last)
+                                                                <hr class="my-4">
+                                                            @endif
+                                                        @endforeach
+                                                    </form>
                                                 @endif
                                             </div>
                                             <div class="modal-footer">
@@ -379,6 +385,7 @@
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <div class="modal fade" id="editModaltgl" tabindex="-1"
                                     aria-labelledby="editModalLabel" aria-hidden="true">
@@ -442,7 +449,7 @@
             // Initialize DataTables
             var tanggalTable = $('#tanggalTable').DataTable({
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
+                    // "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
                 },
                 "columnDefs": [{
                     "orderable": false,
@@ -452,7 +459,7 @@
 
             var mataKuliahTable = $('#mataKuliahTable').DataTable({
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
+                    // "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
                 },
                 "columnDefs": [{
                     "orderable": false,
@@ -552,12 +559,61 @@
             $(`#${modalId}`).modal('hide');
         }
 
-        function confirmDelete(id) {
-            if (confirm(
-                    'Apakah Anda yakin ingin menghapus mata kuliah ini? Semua data terkait (tanggal dan jadwal) akan ikut terhapus.'
-                )) {
-                deleteMatkul(id);
-            }
+        //MENANGANI ALERT KONFIRMASI HAPUS DAN HAPUS DATA MATA KULIAH, TANGGAL&JADWAL//
+        function showDeleteConfirmation(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data mata kuliah beserta tanggal dan jadwal terkait akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                timer: 5000,
+                timerProgressBar: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteMatkul(id);
+                }
+            });
+        }
+
+        function deleteMatkul(id) {
+            fetch(`/mata-kuliah/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                        // Refresh atau hapus elemen dari DOM jika diperlukan
+                        document.getElementById(`delete-form-${id}`).closest('tr').remove();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: data.message
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan!',
+                        text: 'Gagal menghapus data mata kuliah'
+                    });
+                });
         }
 
         function deleteMatkul(id) {
@@ -582,6 +638,68 @@
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Terjadi kesalahan saat menghapus data');
+                });
+        }
+        //MENANGANI ALERT KOFIRMASI DAN HAPUS DATA TANGGAL&JADWAL//
+        function confirmDeleteTanggal(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data tanggal dan jadwal terkait akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteTanggal(id);
+                }
+            });
+        }
+
+        function deleteTanggal(id) {
+            fetch(`/tanggal/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw response;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                        // Hapus baris tabel
+                        document.getElementById(`delete-form-${id}`).closest('tr').remove();
+                    }
+                })
+                .catch(async (error) => {
+                    let errorMessage = 'Gagal menghapus data tanggal';
+                    try {
+                        const errorData = await error.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        console.error('Error parsing error response:', e);
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: errorMessage
+                    });
                 });
         }
         document.getElementById('jadwalForm').addEventListener('submit', function(e) {
@@ -640,69 +758,6 @@
                 });
         });
 
-        function confirmDelete(id) {
-            Swal.fire({
-                title: 'Apakah anda yakin?',
-                text: "Data mata kuliah beserta tanggal dan jadwal terkait akan dihapus secara permanen!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal',
-                timer: 5000,
-                timerProgressBar: true,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    deleteMatKul(id);
-                }
-            });
-        }
-
-        function deleteMatKul(id) {
-            fetch(`/delmatkul/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Berhasil!',
-                            text: data.message,
-                            icon: 'success',
-                            timer: 5000,
-                            timerProgressBar: true,
-                            showConfirmButton: false
-                        }).then(() => {
-                            // Hapus baris dari tabel
-                            document.getElementById(`delete-form-${id}`).closest('tr').remove();
-                            // Refresh halaman setelah SweetAlert
-                            location.reload();
-                        });
-                    } else {
-                        throw new Error(data.message);
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: error.message || 'Terjadi kesalahan saat menghapus data',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
-                    }).then(() => {
-                        // Refresh halaman setelah SweetAlert jika ada error
-                        location.reload();
-                    });
-                });
-        }
-
         document.getElementById('mataKuliahForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -742,7 +797,8 @@
                             window.location.reload();
                         });
                     } else {
-                        throw new Error(data.message || 'Terjadi kesalahan saat menambahkan mata kuliah');
+                        throw new Error(data.message ||
+                            'Terjadi kesalahan saat menambahkan mata kuliah');
                     }
                 })
                 .catch(error => {
@@ -926,7 +982,8 @@
                     } else {
                         Swal.fire({
                             title: 'Error!',
-                            text: data.message || 'Terjadi kesalahan saat mengupdate tanggal',
+                            text: data.message ||
+                                'Terjadi kesalahan saat mengupdate tanggal',
                             icon: 'error',
                             timer: 5000,
                             timerProgressBar: true,
@@ -961,7 +1018,8 @@
                     // Cek status response
                     if (!response.ok) {
                         return response.json().then(data => {
-                            throw new Error(data.message || 'Terjadi kesalahan pada server');
+                            throw new Error(data.message ||
+                                'Terjadi kesalahan pada server');
                         });
                     }
                     return response.json(); // Kembalikan response dalam format JSON
@@ -1105,42 +1163,6 @@
                             alert('Terjadi kesalahan saat menghapus sesi');
                         });
                 }
-            }
-        }
-        //HAPUS DATA JADWAL DI DALAM MODAL
-        function confirmDelete(id_tanggal) {
-            if (confirm('Apakah Anda yakin ingin menghapus data jadwal ini?')) {
-                fetch(`/jadwal/${id_tanggal}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            // Tampilkan notifikasi dengan SweetAlert2
-                            Swal.fire({
-                                title: data.message,
-                                position: 'top-end',
-                                toast: true,
-                                icon: 'success',
-                                showConfirmButton: false,
-                                timer: 5000,
-                                timerProgressBar: true,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer);
-                                    toast.addEventListener('mouseleave', Swal.resumeTimer);
-                                }
-                            }).then(() => {
-                                // Refresh halaman setelah alert ditutup
-                                location.reload();
-                            });
-                        } else {
-                            alert('Gagal menghapus data jadwal. Silakan coba lagi.');
-                        }
-                    })
-                    .catch(error => console.error('Terjadi kesalahan:', error));
             }
         }
 

@@ -7,16 +7,17 @@ use App\Models\Jadwal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TanggalController extends Controller
 {
-    public function hapusData($id_tanggal)
-    {
-        Jadwal::where('id_tanggal', $id_tanggal)->delete();
-        Tanggal::where('id_tanggal', $id_tanggal)->delete();
+    // public function hapusData($id_tanggal)
+    // {
+    //     Jadwal::where('id_tanggal', $id_tanggal)->delete();
+    //     Tanggal::where('id_tanggal', $id_tanggal)->delete();
 
-        return redirect()->back()->with('status', 'Data berhasil dihapus');
-    }
+    //     return redirect()->back()->with('status', 'Data berhasil dihapus');
+    // }
     public function datatanggal()
     {
         $jadwals = Jadwal::all();
@@ -31,30 +32,34 @@ class TanggalController extends Controller
 
         return redirect('/matkul');
     }
-    public function destroy($id_tanggal)
+    public function destroy($id)  // Ubah dari deleteTanggal menjadi destroy
     {
         try {
-            // Mulai transaksi database
             DB::beginTransaction();
 
-            // Hapus jadwal terkait terlebih dahulu
-            Jadwal::where('id_tanggal', $id_tanggal)->delete();
+            // Periksa apakah data exists terlebih dahulu
+            $tanggal = Tanggal::findOrFail($id);
+
+            // Hapus jadwal terkait
+            Jadwal::where('id_tanggal', $id)->delete();
 
             // Hapus data tanggal
-            Tanggal::where('id', $id_tanggal)->delete();
+            $tanggal->delete();
 
-            // Commit transaksi jika semua berhasil
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data tanggal dan jadwal berhasil dihapus',
-                'redirect' => true  // Tambahkan flag untuk redirect
+                'message' => 'Data tanggal dan jadwal berhasil dihapus'
             ]);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tanggal tidak ditemukan'
+            ], 404);
         } catch (\Exception $e) {
-            // Rollback transaksi jika terjadi kesalahan
-            DB::rollback();
-
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menghapus data: ' . $e->getMessage()

@@ -12,6 +12,7 @@ use App\Http\Controllers\UjadwalController;
 use Illuminate\Support\Facades\Route;
 
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -24,7 +25,6 @@ Route::get('/sidebar', [JadwalController::class, 'sidebar'])->name('sidebar');
 Route::get('/halaman', [MahasiswaController::class, 'halaman'])->name('halaman');
 Route::get('/viewjw', [JadwalController::class, 'viewjw'])->name('viewjw');
 Route::get('/dash', [MahasiswaController::class, 'dash'])->name('dash');
-Route::get('/transfer-data-page', [UjadwalController::class, 'showTransferPage']);
 Route::get('/ummadmin', [LoginController::class, 'loginadmin'])->name('ummadmin');
 Route::get('/role', [AuthController::class, 'role'])->name('role');
 Route::get('/mahasiswa', [MahasiswaController::class, 'mahasiswa'])->name('mahasiswa')->middleware('auth');
@@ -65,9 +65,10 @@ Route::post('/delete-session', 'YourController@deleteSession')->name('delete.ses
 //ROUTE DELETE
 Route::delete('/delmatkul/{id}', [MatakuliahController::class, 'deleteMatkul'])->name('delmatkul');
 Route::delete('/user/{id}', [AuthController::class, 'deleteUser'])->name('user.delete');
-Route::delete('/hapus/{id_tanggal}', [TanggalController::class, 'hapusData'])->name('hapustgl');
+// Route::delete('/hapus/{id_tanggal}', [TanggalController::class, 'hapusData'])->name('hapustgl');
 Route::delete('/tanggal/{id}', [TanggalController::class, 'destroy'])->name('tanggal.destroy');
 Route::delete('/auth/{id}', [AuthController::class, 'destroy'])->name('auth.destroy');
+Route::delete('/mahasiswa/{id}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');
 Route::delete('/jadwal/{id_tanggal}', [JadwalController::class, 'confirmDelete'])->name('jadwal.delete');
 Route::delete('/tanggal/{id}', [TanggalController::class, 'destroy'])
     ->name('tanggal.destroy');
