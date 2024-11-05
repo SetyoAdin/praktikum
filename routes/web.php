@@ -58,9 +58,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/insertmhs', [MahasiswaController::class, 'insertmhs'])->name('insertmhs');
 Route::post('/insertkelas', [KelasController::class, 'store'])->name('insertkelas');
 Route::post('/reset-password/{email}', [AuthController::class, 'updatePassword'])->middleware('auth');
-Route::post('/profile/update-name', [AuthController::class, 'updateName'])->name('profile.updateName');
+Route::post('/user/update-name', 'AuthController@updateName');
 Route::post('/update-username', [AuthController::class, 'updateUsername'])->name('update.username');
-Route::post('/delete-session', 'YourController@deleteSession')->name('delete.session');
 
 //ROUTE DELETE
 Route::delete('/delmatkul/{id}', [MatakuliahController::class, 'deleteMatkul'])->name('delmatkul');

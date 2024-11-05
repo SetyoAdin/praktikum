@@ -25,12 +25,6 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        // Check if 'nama' exists in super_admins table
-        // $superAdmin = SuperAdmin::where('username', $credentials['nama'])->first();
-        // if ($superAdmin && Hash::check($credentials['password'], $superAdmin->password)) {
-        //     AuthFacade::login($superAdmin);
-        //     return redirect()->intended('/dashboard');
-        // }
 
         // Check if 'nama' exists in either table 
         $user = User::where('nama', $credentials['nama'])->first();

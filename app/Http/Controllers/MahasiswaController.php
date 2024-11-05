@@ -7,8 +7,8 @@ use App\Models\Kelas;
 use App\Models\Tanggal;
 use App\Models\MataKuliah;
 use App\Models\Mahasiswa;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Models\Ruangan;
+use App\Models\PenanggungJawab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -124,8 +124,7 @@ class MahasiswaController extends Controller
         $tanggals = Tanggal::all();
         $jadwals = Jadwal::all();
         $matkuls = MataKuliah::all();
-        $mahasiswas = Mahasiswa::all();
-
+        $mahasiswas = Mahasiswa::with(['ruangan', 'penanggungJawab'])->get();
         return view('admin.mahasiswa', compact('mahasiswas', 'tanggals', 'jadwals', 'matkuls',));
     }
     public function min()

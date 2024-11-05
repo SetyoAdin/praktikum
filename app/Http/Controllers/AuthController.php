@@ -12,47 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-
-
-    // public function login(Request $request)
-    // {
-    //     $credentials = $request->only('email', 'password');
-
-    //     // Log the credentials (remove in production)
-    //     Log::info('Login attempt:', ['email' => $credentials['email']]);
-
-    //     // Check if the user exists
-    //     $user = \App\Models\Auth::where('email', $credentials['email'])->first();
-    //     if (!$user) {
-    //         Log::warning('User not found:', ['email' => $credentials['email']]);
-    //         return back()->withErrors(['email' => 'Email tidak ditemukan.']);
-    //     }
-
-    //     Log::info('User found:', ['user' => $user]);
-
-    //     // Check if the password is correct
-    //     if (!Hash::check($credentials['password'], $user->password)) {
-    //         Log::warning('Incorrect password for user:', ['email' => $credentials['email']]);
-    //         return back()->withErrors(['password' => 'Password salah.']);
-    //     }
-
-    //     // Attempt to log in
-    //     if (Auth::attempt($credentials)) {
-    //         Log::info('Login successful:', ['email' => $credentials['email']]);
-
-    //         // Set user_name session
-    //         session(['user_name' => $user->nama]);
-
-    //         return redirect()->intended('/dashboard')->with('login_success', true); // Mengatur session untuk menandai login berhasil
-    //     }
-
-    //     Log::error('Authentication failed for valid credentials:', ['email' => $credentials['email']]);
-
-    //     return back()->withErrors(['email' => 'Gagal login. Silakan coba lagi.']);
-    // }
-
-
-
     public function register(Request $request)
     {
         $request->validate([
@@ -121,24 +80,30 @@ class AuthController extends Controller
     {
         return view('admin.profile');
     }
-    public function updateName(Request $request)
+    public function updateName(Request $request, $id)
     {
+        // Validate the input name
         $request->validate([
             'nama' => 'required|string|max:255',
         ]);
 
-        $user = Auth::user();
+        try {
+            // Find the user data based on the ID
+            $auth = Auth::findOrFail($id);
 
-        if ($user instanceof User) {
-            $user->nama = $request->input('nama');
-            $user->save();
+            // Update the user's name
+            $auth->nama = $request->input('nama');
+            $auth->save();
 
-            return response()->json([
-                'success' => true,
-                'nama' => $user->nama,
-            ]);
-        } else {
-            return response()->json(['success' => false, 'message' => 'User not authenticated']);
+            // Redirect back to the user list page with a success message
+            return redirect()->back()->with('success', 'Nama pengguna berhasil diperbarui.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Handle the case when the user data is not found
+            return response()->json(['error' => 'Data pengguna tidak ditemukan.'], 404);
+        } catch (\Throwable $e) {
+            // Handle other exceptions that may occur during the update process
+            Log::error('Error updating user name: ' . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan saat memperbarui nama pengguna.'], 500);
         }
     }
     public function updateNama(Request $request, $id)
