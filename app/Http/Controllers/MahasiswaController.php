@@ -124,7 +124,7 @@ class MahasiswaController extends Controller
         $tanggals = Tanggal::all();
         $jadwals = Jadwal::all();
         $matkuls = MataKuliah::all();
-        $mahasiswas = Mahasiswa::with(['ruangan', 'penanggungJawab'])->get();
+        $mahasiswas = Mahasiswa::all();
         return view('admin.mahasiswa', compact('mahasiswas', 'tanggals', 'jadwals', 'matkuls',));
     }
     public function min()

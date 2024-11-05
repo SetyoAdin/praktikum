@@ -34,13 +34,4 @@ class Mahasiswa extends Model
     {
         return $this->belongsTo(MataKuliah::class, 'id_mata_kuliah', 'id_mata_kuliah');
     }
-    public function ruangan()
-    {
-        return $this->hasOne(Ruangan::class, 'nim', 'nim');
-    }
-
-    public function penanggung_Jawab()
-    {
-        return $this->hasOne(Penanggung_Jawab::class, 'nim', 'nim');
-    }
 }
