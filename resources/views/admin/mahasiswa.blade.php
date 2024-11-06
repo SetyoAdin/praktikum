@@ -1,68 +1,54 @@
 @extends('layout.dash')
 @section('content')
-    <table>
-        <thead>
-            <tr>
-                <th>Nama</th>
-                <th>NIM</th>
-                <th>Ruangan</th>
-                <th>Penanggung Jawab</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($mahasiswas as $mahasiswa)
-                <tr>
-                    <td>{{ $mahasiswa->nama }}</td>
-                    <td>{{ $mahasiswa->nim }}</td>
-                    <td>
-                        @if ($mahasiswa->ruangan)
-                            {{ $mahasiswa->ruangan->ruangan }}
-                        @else
-                            <button onclick="showModal('ruangan', '{{ $mahasiswa->nim }}')">Tambah</button>
-                        @endif
-                    </td>
-                    <td>
-                        @if ($mahasiswa->penanggungJawab)
-                            {{ $mahasiswa->penanggungJawab->penanggung_jawab }}
-                        @else
-                            <button onclick="showModal('penanggungJawab', '{{ $mahasiswa->nim }}')">Tambah</button>
-                        @endif
-                    </td>
-                </tr>
-                <div id="modal" style="display: none;">
-                    <form id="form">
-                        <input type="hidden" name="nim" id="nim">
-                        <input type="text" name="value" id="value" placeholder="Masukkan data">
-                        <button type="button" onclick="submitForm()">Kirim</button>
-                    </form>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+
+                <div class="card-header">Data Jadwal</div>
+
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Nama</th>
+                                <th>NIM</th>
+                                <th>Mata Kuliah</th>
+                                <th>Waktu</th>
+                                <th>Kuota</th>
+                                <th>Sesi</th>
+                                <th>Kelas</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($mahasiswas as $mahasiswa)
+                                <tr>
+                                    <td>{{ $mahasiswa->tanggal }}</td>
+                                    <td>{{ $mahasiswa->nama }}</td>
+                                    <td>{{ $mahasiswa->nim }}</td>
+                                    <td>{{ $mahasiswa->mata_kuliah }}</td>
+                                    <td>{{ $mahasiswa->waktu_mulai }} - {{ $mahasiswa->waktu_selesai }}</td>
+                                    <td>{{ $mahasiswa->kuota }}</td>
+                                    <td>{{ $mahasiswa->sesi }}</td>
+                                    <td>{{ $mahasiswa->kelas }}</td>
+                                    <td>
+                                        {{-- <a href="{{ route('jadwal.edit', $mahasiswa->id) }}" --}}
+                                        class="btn btn-primary btn-sm">Edit</a>
+                                        {{-- <form action="{{ route('jadwal.destroy', $mahasiswa->id) }}" method="POST" --}}
+                                        style="display: inline-block;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @endforeach
-        </tbody>
-    </table>
-    <script>
-        function showModal(type, nim) {
-            document.getElementById('modal').style.display = 'block';
-            document.getElementById('nim').value = nim;
-            document.getElementById('form').dataset.type = type;
-        }
 
-        function submitForm() {
-            const nim = document.getElementById('nim').value;
-            const value = document.getElementById('value').value;
-            const type = document.getElementById('form').dataset.type;
-
-            fetch(`/mahasiswa/tambah-${type}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        nim,
-                        value
-                    })
-                }).then(response => response.json())
-                .then(data => location.reload());
-        }
-    </script>
+            </div>
+        </div>
+    </div>
 @endsection

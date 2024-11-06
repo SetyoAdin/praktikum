@@ -24,6 +24,8 @@ return new class extends Migration
                 $table->integer('kuota');
                 $table->string('sesi');
                 $table->string('kelas');
+                $table->string('ruangan')->nullable();
+                $table->string('penanggung_jawab')->nullable();
                 $table->unsignedBigInteger('id_jadwal')->nullable();
                 $table->timestamps();
 

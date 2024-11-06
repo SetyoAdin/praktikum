@@ -86,7 +86,7 @@ class MahasiswaController extends Controller
             // Kurangi kuota
             $jadwal->decrement('kuota');
 
-            // Simpan data mahasiswa
+            // Simpan data mahasiswa tanpa mengisi kolom `penanggung_jawab` dan `id_jadwal`
             $mahasiswa = new Mahasiswa();
             $mahasiswa->tanggal = $tanggal->tanggal;
             $mahasiswa->nama = $request->nama;
@@ -98,7 +98,7 @@ class MahasiswaController extends Controller
             $mahasiswa->kuota = $jadwal->kuota; // Kuota setelah dikurangi
             $mahasiswa->sesi = $jadwal->sesi;
             $mahasiswa->kelas = $request->kelas;
-            $mahasiswa->id_jadwal = $jadwal->id_jadwal; // Simpan ID jadwal jika diperlukan
+            // Jangan isi `penanggung_jawab` dan `id_jadwal`
 
             $mahasiswa->save();
 
@@ -119,6 +119,7 @@ class MahasiswaController extends Controller
             ], 422);
         }
     }
+
     public function mahasiswa(Request $request)
     {
         $tanggals = Tanggal::all();
