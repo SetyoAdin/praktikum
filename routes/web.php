@@ -60,8 +60,9 @@ Route::post('/insertkelas', [KelasController::class, 'store'])->name('insertkela
 Route::post('/reset-password/{email}', [AuthController::class, 'updatePassword'])->middleware('auth');
 Route::post('/user/update-name', 'AuthController@updateName');
 Route::post('/update-username', [AuthController::class, 'updateUsername'])->name('update.username');
-Route::post('/mahasiswa/tambah-ruangan', [MahasiswaController::class, 'tambahRuangan']);
-Route::post('/mahasiswa/tambah-penanggung-jawab', [MahasiswaController::class, 'tambahPenanggungJawab']);
+Route::post('/mahasiswa/update-ruangan', [MahasiswaController::class, 'updateRuangan'])->name('mahasiswa.updateRuangan');
+Route::post('/mahasiswa/delete/{id}', [MahasiswaController::class, 'delete'])->name('mahasiswa.delete');
+
 
 //ROUTE DELETE
 Route::delete('/delmatkul/{id}', [MatakuliahController::class, 'deleteMatkul'])->name('delmatkul');

@@ -113,7 +113,7 @@
                                                     <select class="form-control" id="sesi" name="sesi" required>
                                                         <option value="">Pilih Sesi</option>
                                                         @for ($i = 1; $i <= 10; $i++)
-                                                            <option value="Sesi {{ $i }}">Sesi
+                                                            <option value="Sesi {{ $i }}">
                                                                 {{ $i }}</option>
                                                         @endfor
                                                     </select>
@@ -206,10 +206,6 @@
                                             <i class="fas fa-pencil-alt edit-icon"></i>
                                         </a>
 
-                                        <a href="javascript:void(0);" class="icon-button"
-                                            onclick="displayMataKuliahModal()">
-                                            <i class="fas fa-eye" style="color: blue"></i>
-                                        </a>
                                     </td>
                                 </tr>
                                 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"

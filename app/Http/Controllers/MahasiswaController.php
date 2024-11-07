@@ -136,4 +136,39 @@ class MahasiswaController extends Controller
     {
         return view('admin.dashboard');
     }
+    public function updateRuangan(Request $request)
+    {
+        $request->validate([
+            'mahasiswa_id' => 'required|exists:mahasiswa,id',
+            'ruangan' => 'required|string',
+            'penanggung_jawab' => 'required|string'
+        ]);
+
+        $mahasiswa = Mahasiswa::find($request->mahasiswa_id);
+        $mahasiswa->ruangan = $request->ruangan;
+        $mahasiswa->penanggung_jawab = $request->penanggung_jawab;
+        $mahasiswa->save();
+
+        return redirect()->back()->with('success', 'Data ruangan dan penanggung jawab berhasil diperbarui.');
+    }
+    public function delete(Request $request, $id)
+    {
+        // Cari data mahasiswa berdasarkan ID
+        $mahasiswa = Mahasiswa::findOrFail($id);
+
+        // Dapatkan ID jadwal
+        $jadwalId = $request->input('jadwalId');
+
+        // Hapus data mahasiswa
+        $mahasiswa->delete();
+
+        if ($jadwalId) {
+            $jadwal = Jadwal::where('id_jadwal', $jadwalId)->first();
+            if ($jadwal) {
+                $jadwal->decrement('kuota'); // Kurangi kuota sebanyak 1
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
 }
