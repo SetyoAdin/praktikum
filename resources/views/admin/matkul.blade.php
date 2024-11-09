@@ -100,6 +100,7 @@
                                                             @foreach ($tanggals as $tanggal)
                                                                 <option value="{{ $tanggal->id_tanggal }}">
                                                                     {{ \Carbon\Carbon::parse($tanggal->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
+                                                                    - {{ $tanggal->mataKuliah->matkul }}
                                                                 </option>
                                                             @endforeach
                                                         @endif
@@ -191,12 +192,12 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $matkul->matkul }}</td>
                                     <td>
-                                        <form id="delete-form-{{ $matkul->id_mata_kuliah }}" class="delete-form"
+                                        <form id="delete-matkul-form-{{ $matkul->id_mata_kuliah }}" class="delete-form"
                                             style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="button" class="icon-button delete-btn"
-                                                onclick="confirmDelete({{ $matkul->id_mata_kuliah }})">
+                                                onclick="confirmDeleteMataKuliah({{ $matkul->id_mata_kuliah }})">
                                                 <i class="fas fa-trash-alt trash-icon"></i>
                                             </button>
                                         </form>
@@ -274,13 +275,12 @@
                                     <td>{{ \Carbon\Carbon::parse($tanggal->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                                     </td>
                                     <td>
-                                        <form id="delete-form-{{ $matkul->id_mata_kuliah }}" class="delete-form"
-                                            data-id="{{ $matkul->id_mata_kuliah }}" onsubmit="return false;"
+                                        <form id="delete-tanggal-form-{{ $tanggal->id_tanggal }}" class="delete-form"
                                             style="display:inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="icon-button" type="button"
-                                                onclick="confirmDelete({{ $matkul->id_mata_kuliah }})">
+                                            <button type="button" class="icon-button delete-btn"
+                                                onclick="confirmDeleteTanggal({{ $tanggal->id_tanggal }})">
                                                 <i class="fas fa-trash-alt trash-icon"></i>
                                             </button>
                                         </form>
@@ -321,7 +321,7 @@
                                                     @foreach ($sesiJadwals as $jadwal)
                                                         <div class="sesi-container mb-4">
                                                             <div class="d-flex justify-content-between align-items-start">
-                                                                <h4 class="mb-3">Sesi {{ $jadwal->sesi }}</h4>
+                                                                <h4 class="mb-3">{{ $jadwal->sesi }}</h4>
                                                                 <div class="checkbox-container" style="display: none;">
                                                                     <input type="checkbox"
                                                                         class="form-check-input delete-checkbox"
@@ -455,51 +455,8 @@
                     "targets": 2
                 }]
             });
-
-            // Form submission handlers remain unchanged
-
-            $(document).on('submit', '.delete-form', function(e) {
-                e.preventDefault();
-                var form = $(this);
-                Swal.fire({
-                    title: 'Anda yakin?',
-                    text: "Mata kuliah ini akan dihapus!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: form.attr('action'),
-                            method: 'POST',
-                            data: form.serialize(),
-                            success: function(response) {
-                                if (response.success) {
-                                    Swal.fire('Terhapus!', response.message, 'success')
-                                        .then(() => {
-                                            mataKuliahTable.row(form.parents('tr'))
-                                                .remove().draw();
-                                        });
-                                } else {
-                                    Swal.fire('Error', response.message, 'error');
-                                }
-                            },
-                            error: function(xhr) {
-                                var errorMessage =
-                                    'Terjadi kesalahan saat menghapus mata kuliah';
-                                if (xhr.responseJSON && xhr.responseJSON.message) {
-                                    errorMessage = xhr.responseJSON.message;
-                                }
-                                Swal.fire('Error', errorMessage, 'error');
-                            }
-                        });
-                    }
-                });
-            });
         });
+
         document.addEventListener('DOMContentLoaded', function() {
             // Ambil elemen modal
             var editModal = new bootstrap.Modal(document.getElementById('editModal'));
@@ -546,14 +503,6 @@
 
         function closeModal(modalId) {
             $(`#${modalId}`).modal('hide');
-        }
-
-        function confirmDelete(id) {
-            if (confirm(
-                    'Apakah Anda yakin ingin menghapus mata kuliah ini? Semua data terkait (tanggal dan jadwal) akan ikut terhapus.'
-                )) {
-                deleteMatkul(id);
-            }
         }
 
         function deleteMatkul(id) {
@@ -636,68 +585,6 @@
                 });
         });
 
-        function confirmDelete(id) {
-            Swal.fire({
-                title: 'Apakah anda yakin?',
-                text: "Data mata kuliah beserta tanggal dan jadwal terkait akan dihapus secara permanen!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal',
-                timer: 5000,
-                timerProgressBar: true,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    deleteMatKul(id);
-                }
-            });
-        }
-
-        function deleteMatKul(id) {
-            fetch(`/delmatkul/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Berhasil!',
-                            text: data.message,
-                            icon: 'success',
-                            timer: 5000,
-                            timerProgressBar: true,
-                            showConfirmButton: false
-                        }).then(() => {
-                            // Hapus baris dari tabel
-                            document.getElementById(`delete-form-${id}`).closest('tr').remove();
-                            // Refresh halaman setelah SweetAlert
-                            location.reload();
-                        });
-                    } else {
-                        throw new Error(data.message);
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: error.message || 'Terjadi kesalahan saat menghapus data',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
-                    }).then(() => {
-                        // Refresh halaman setelah SweetAlert jika ada error
-                        location.reload();
-                    });
-                });
-        }
 
         document.getElementById('mataKuliahForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -888,7 +775,7 @@
                 editModal.querySelector('#edit-tanggal').value = tanggal;
             });
         });
-
+        //MODAL EDIT TANGGAL
         document.getElementById('editTanggalForm').addEventListener('submit', function(e) {
             e.preventDefault(); // Mencegah reload halaman
 
@@ -941,6 +828,7 @@
                     });
                 });
         });
+
         document.getElementById('kelasForm').addEventListener('submit', function(e) {
             e.preventDefault(); // Mencegah reload halaman
 
@@ -987,198 +875,113 @@
                     });
                 });
         });
-        //MEMUNCULKAN CHECK BOX PADA MODAL SESI
-        function toggleDeleteMode(modalId) {
-            // Tampilkan checkbox
-            const modal = document.getElementById(`staticBackdrop${modalId}`);
-            const checkboxes = modal.querySelectorAll('.checkbox-container');
-            checkboxes.forEach(checkbox => {
-                checkbox.style.display = 'block';
-            });
-
-            // Tampilkan tombol batal dan konfirmasi hapus
-            const batalBtn = modal.querySelector('.batal-btn');
-            const deleteConfirmBtn = modal.querySelector('.delete-confirm-btn');
-            const deleteBtn = modal.querySelector('.btn-danger:not(.delete-confirm-btn)');
-
-            batalBtn.style.display = 'inline-block';
-            deleteConfirmBtn.style.display = 'inline-block';
-            deleteBtn.style.display = 'none';
-
-            // Tambahkan event listener untuk checkbox
-            const deleteCheckboxes = modal.querySelectorAll('.delete-checkbox');
-            deleteCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    updateDeleteButton(modalId);
-                });
-            });
-        }
-
-        function cancelDelete(modalId) {
-            const modal = document.getElementById(`staticBackdrop${modalId}`);
-
-            // Sembunyikan checkbox
-            const checkboxes = modal.querySelectorAll('.checkbox-container');
-            checkboxes.forEach(checkbox => {
-                checkbox.style.display = 'none';
-            });
-
-            // Reset checkbox
-            const deleteCheckboxes = modal.querySelectorAll('.delete-checkbox');
-            deleteCheckboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
-
-            // Kembalikan tombol ke kondisi awal
-            const batalBtn = modal.querySelector('.batal-btn');
-            const deleteConfirmBtn = modal.querySelector('.delete-confirm-btn');
-            const deleteBtn = modal.querySelector('.btn-danger:not(.delete-confirm-btn)');
-
-            batalBtn.style.display = 'none';
-            deleteConfirmBtn.style.display = 'none';
-            deleteBtn.style.display = 'inline-block';
-        }
-
-        function updateDeleteButton(modalId) {
-            const modal = document.getElementById(`staticBackdrop${modalId}`);
-            const deleteConfirmBtn = modal.querySelector('.delete-confirm-btn');
-            const checkedBoxes = modal.querySelectorAll('.delete-checkbox:checked');
-
-            // Enable tombol hapus hanya jika ada checkbox yang dicentang
-            deleteConfirmBtn.disabled = checkedBoxes.length === 0;
-        }
-        // Memeriksa status checkbox dan mengaktifkan button jika ada yang terpilih
-        function updateDeleteButtonStatus(modalId) {
-            const modal = document.getElementById(`staticBackdrop${modalId}`);
-            const deleteButton = modal.querySelector('.delete-session-btn');
-            const checkedBoxes = modal.querySelectorAll('.delete-checkbox:checked');
-
-            // Aktifkan tombol jika ada checkbox yang terpilih
-            if (checkedBoxes.length > 0) {
-                deleteButton.disabled = false;
-                deleteButton.style.display = 'inline-block';
-            } else {
-                deleteButton.disabled = true;
-                deleteButton.style.display = 'none';
-            }
-        }
-
-        // Tambahkan listener ke setiap checkbox untuk memanggil fungsi di atas
-        document.querySelectorAll('.delete-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const modalId = this.closest('.modal').id.replace('staticBackdrop', '');
-                updateDeleteButtonStatus(modalId);
-            });
-        });
-
-        function handleDeleteSession(modalId) {
-            const modal = document.getElementById(`staticBackdrop${modalId}`);
-            const form = document.getElementById(`deleteForm${modalId}`);
-            const checkedBoxes = modal.querySelectorAll('.delete-checkbox:checked');
-
-            if (checkedBoxes.length > 0) {
-                if (confirm('Apakah Anda yakin ingin menghapus sesi yang dipilih?')) {
-                    const formData = new FormData(form);
-
-                    fetch('/delete-session', {
-                            method: 'DELETE',
-                            body: formData,
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                alert(data.message);
-                                location.reload(); // Reload halaman setelah berhasil
-                            } else {
-                                alert(data.message || 'Gagal menghapus sesi');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Terjadi kesalahan saat menghapus sesi');
-                        });
-                }
-            }
-        }
         //HAPUS DATA JADWAL DI DALAM MODAL
-        function confirmDelete(id_tanggal) {
-            if (confirm('Apakah Anda yakin ingin menghapus data jadwal ini?')) {
-                fetch(`/jadwal/${id_tanggal}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            // Tampilkan notifikasi dengan SweetAlert2
-                            Swal.fire({
-                                title: data.message,
-                                position: 'top-end',
-                                toast: true,
-                                icon: 'success',
-                                showConfirmButton: false,
-                                timer: 5000,
-                                timerProgressBar: true,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer);
-                                    toast.addEventListener('mouseleave', Swal.resumeTimer);
-                                }
-                            }).then(() => {
-                                // Refresh halaman setelah alert ditutup
-                                location.reload();
-                            });
-                        } else {
-                            alert('Gagal menghapus data jadwal. Silakan coba lagi.');
-                        }
-                    })
-                    .catch(error => console.error('Terjadi kesalahan:', error));
-            }
-        }
-
-        function displayMataKuliahModal() {
-            const mataKuliahs = [{
-                    id: 1,
-                    nama: "Matematika"
-                },
-                {
-                    id: 2,
-                    nama: "Fisika"
-                }
-                // Ganti array ini dengan data mata kuliah dinamis dari backend jika diperlukan
-            ];
-
-            const container = document.getElementById('mataKuliahContainer');
-            container.innerHTML = ''; // Bersihkan isi kontainer
-
-            mataKuliahs.forEach((mataKuliah, index) => {
-                // Buat elemen untuk setiap mata kuliah
-                const rowDiv = document.createElement('div');
-                rowDiv.classList.add('row', 'mb-2');
-
-                const colLabel = document.createElement('div');
-                colLabel.classList.add('col-md-4');
-                colLabel.textContent = `Mata Kuliah ${index + 1}`;
-
-                const colValue = document.createElement('div');
-                colValue.classList.add('col-md-5');
-                colValue.textContent = `: ${mataKuliah.nama}`;
-
-                // Masukkan elemen ke row dan ke kontainer
-                rowDiv.appendChild(colLabel);
-                rowDiv.appendChild(colValue);
-                container.appendChild(rowDiv);
-            });
-
-            document.getElementById('dynamicModal').style.display = 'block';
-        }
 
         function hideMataKuliahModal() {
             document.getElementById('dynamicModal').style.display = 'none';
+        }
+        /*HAPUS PADA TABEL MATA KULIAH DAN TANGGAL*/
+        // public/js/delete-handlers.js
+        function confirmDeleteMataKuliah(id) {
+            Swal.fire({
+                title: 'Hapus Mata Kuliah?',
+                text: "Semua data tanggal dan jadwal terkait akan ikut terhapus!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteMataKuliah(id);
+                }
+            });
+        }
+
+        function confirmDeleteTanggal(id) {
+            Swal.fire({
+                title: 'Hapus Tanggal?',
+                text: "Semua data jadwal terkait akan ikut terhapus!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteTanggal(id);
+                }
+            });
+        }
+
+        function deleteMataKuliah(id) {
+            $.ajax({
+                url: `/mata-kuliah/${id}`,
+                type: 'DELETE',
+                data: {
+                    "_token": $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire(
+                            'Terhapus!',
+                            response.message,
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Gagal!',
+                            response.message,
+                            'error'
+                        );
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire(
+                        'Error!',
+                        'Terjadi kesalahan saat menghapus data',
+                        'error'
+                    );
+                }
+            });
+        }
+
+        function deleteTanggal(id) {
+            $.ajax({
+                url: `/tanggal/${id}`,
+                type: 'DELETE',
+                data: {
+                    "_token": $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire(
+                            'Terhapus!',
+                            response.message,
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Gagal!',
+                            response.message,
+                            'error'
+                        );
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire(
+                        'Error!',
+                        'Terjadi kesalahan saat menghapus data',
+                        'error'
+                    );
+                }
+            });
         }
     </script>
 

@@ -20,8 +20,8 @@ class MahasiswaController extends Controller
 {
     public function halaman()
     {
-        $jadwals = Jadwal::all();
-        return view('user.halaman', compact('jadwals'));
+        $mataKuliahs = MataKuliah::with(['tanggals.jadwals'])->get();
+        return view('user.halaman', compact('mataKuliahs'));
     }
     public function dash()
     {
@@ -156,17 +156,15 @@ class MahasiswaController extends Controller
         // Cari data mahasiswa berdasarkan ID
         $mahasiswa = Mahasiswa::findOrFail($id);
 
-        // Dapatkan ID jadwal
-        $jadwalId = $request->input('jadwalId');
+        // Ambil ID jadwal dari data mahasiswa
+        $jadwalId = $mahasiswa->id_jadwal;
 
         // Hapus data mahasiswa
         $mahasiswa->delete();
 
+        // Tambah kuota di jadwal terkait
         if ($jadwalId) {
-            $jadwal = Jadwal::where('id_jadwal', $jadwalId)->first();
-            if ($jadwal) {
-                $jadwal->decrement('kuota'); // Kurangi kuota sebanyak 1
-            }
+            DB::table('jadwals')->where('id_jadwal', $jadwalId)->increment('kuota', 1);
         }
 
         return response()->json(['success' => true]);
