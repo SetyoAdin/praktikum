@@ -7,8 +7,7 @@ use App\Models\Kelas;
 use App\Models\Tanggal;
 use App\Models\MataKuliah;
 use App\Models\Mahasiswa;
-use App\Models\Ruangan;
-use App\Models\PenanggungJawab;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -153,20 +152,46 @@ class MahasiswaController extends Controller
     }
     public function delete(Request $request, $id)
     {
-        // Cari data mahasiswa berdasarkan ID
-        $mahasiswa = Mahasiswa::findOrFail($id);
+        try {
+            DB::beginTransaction();
 
-        // Ambil ID jadwal dari data mahasiswa
-        $jadwalId = $mahasiswa->id_jadwal;
+            // Cari data mahasiswa berdasarkan ID
+            $mahasiswa = Mahasiswa::findOrFail($id);
 
-        // Hapus data mahasiswa
-        $mahasiswa->delete();
+            // Ambil ID jadwal sebelum data dihapus
+            $jadwalId = $mahasiswa->id_jadwal;
 
-        // Tambah kuota di jadwal terkait
-        if ($jadwalId) {
-            DB::table('jadwals')->where('id_jadwal', $jadwalId)->increment('kuota', 1);
+            // Hapus data mahasiswa
+            $mahasiswa->delete();
+
+            if ($jadwalId) {
+                $jadwal = Jadwal::findOrFail($jadwalId);
+                $oldQuota = $jadwal->kuota;
+
+                // Tambah kuota
+                $jadwal->kuota += 1;
+                $jadwal->save();
+
+                // Log perubahan kuota
+                Log::info('Kuota berhasil ditambah', [
+                    'jadwal_id' => $jadwalId,
+                    'kuota_lama' => $oldQuota,
+                    'penambahan' => 1,
+                    'kuota_baru' => $jadwal->kuota
+                ]);
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dihapus dan kuota berhasil ditambah'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus data'
+            ], 500);
         }
-
-        return response()->json(['success' => true]);
     }
 }

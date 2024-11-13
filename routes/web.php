@@ -61,7 +61,7 @@ Route::post('/reset-password/{email}', [AuthController::class, 'updatePassword']
 Route::post('/user/update-name', 'AuthController@updateName');
 Route::post('/update-username', [AuthController::class, 'updateUsername'])->name('update.username');
 Route::post('/mahasiswa/update-ruangan', [MahasiswaController::class, 'updateRuangan'])->name('mahasiswa.updateRuangan');
-Route::post('/mahasiswa/delete/{id}', [MahasiswaController::class, 'delete'])->name('mahasiswa.delete');
+// Route::post('/mahasiswa/delete/{id}', [MahasiswaController::class, 'delete'])->name('mahasiswa.delete');
 
 
 //ROUTE DELETE
@@ -75,3 +75,4 @@ Route::delete('/auth/{id}', [AuthController::class, 'destroy'])->name('auth.dest
 //     ->name('tanggal.destroy');
 Route::delete('/mata-kuliah/{id}', [MatakuliahController::class, 'destroyMataKuliah'])->name('matkul.destroy');
 Route::delete('/tanggal/{id}', [MatakuliahController::class, 'destroyTanggal'])->name('tanggal.destroy');
+Route::delete('/mahasiswa/delete/{id}', [MahasiswaController::class, 'delete'])->name('mahasiswa.delete');

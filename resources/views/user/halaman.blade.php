@@ -246,41 +246,6 @@
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section class="py-5" id="contact">
-        <div class="container">
-            <h2 class="text-center mb-5">Hubungi Kami</h2>
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <form class="animate-on-scroll">
-                        <div class="mb-3">
-                            <input type="text" class="form-control" placeholder="Nama Anda">
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" class="form-control" placeholder="Email Anda">
-                        </div>
-                        <div class="mb-3">
-                            <textarea class="form-control" rows="5" placeholder="Pesan Anda"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Kirim Pesan</button>
-                    </form>
-                </div>
-                <div class="col-md-6 mb-4 animate-on-scroll">
-                    <h5>Lokasi Kami</h5>
-                    <p><i class="fas fa-map-marker-alt me-2"></i>Jl. Universitas No. 123, Kota Ilmu, 12345</p>
-                    <h5>Informasi Kontak</h5>
-                    <p><i class="fas fa-phone me-2"></i>(021) 123-4567</p>
-                    <p><i class="fas fa-envelope me-2"></i>info@labpraktikum.ac.id</p>
-                    <h5>Ikuti Kami</h5>
-                    <a href="#" class="text-dark me-2"><i class="fab fa-facebook fa-2x"></i></a>
-                    <a href="#" class="text-dark me-2"><i class="fab fa-twitter fa-2x"></i></a>
-                    <a href="#" class="text-dark me-2"><i class="fab fa-instagram fa-2x"></i></a>
-                    <a href="#" class="text-dark me-2"><i class="fab fa-linkedin fa-2x"></i></a>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="footer text-center">
         <div class="container">

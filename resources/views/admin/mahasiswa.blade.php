@@ -111,42 +111,53 @@
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Hapus!'
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Kirim permintaan hapus ke server
                     deleteMahasiswa(mahasiswaId, jadwalId);
                 }
             });
         }
 
         function deleteMahasiswa(mahasiswaId, jadwalId) {
+            // Dapatkan CSRF token dari meta tag
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
             fetch(`/mahasiswa/delete/${mahasiswaId}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    jadwalId: jadwalId
+                    method: 'DELETE', // Menggunakan method DELETE
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        jadwal_id: jadwalId
+                    })
                 })
-            }).then(response => {
-                if (response.ok) {
-                    Swal.fire(
-                        'Terhapus!',
-                        'Data berhasil dihapus.',
-                        'success'
-                    ).then(() => {
-                        location.reload(); // Refresh halaman setelah berhasil dihapus
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Terhapus!',
+                            text: data.message,
+                            icon: 'success',
+                            timer: 1500
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: error.message || 'Terjadi kesalahan saat menghapus data',
+                        icon: 'error'
                     });
-                } else {
-                    Swal.fire(
-                        'Gagal!',
-                        'Data gagal dihapus.',
-                        'error'
-                    );
-                }
-            });
+                });
         }
+        // Alert
     </script>
 @endsection
