@@ -165,40 +165,74 @@
             <div class="table-responsive">
                 <table class="table table-hover table-schedule animate-on-scroll">
                     <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>Tanggal</th>
-                            <th>Sesi</th>
-                            <th>Waktu Mulai</th>
-                            <th>Waktu Selesai</th>
-                            <th>Kuota</th>
+                        <tr class="bg-gray-100">
+                            <th class="py-3 px-4 text-center border-b">No</th>
+                            <th class="py-3 px-6 text-left border-b">Mata Kuliah</th>
+                            <th class="py-3 px-6 text-left border-b">Tanggal</th>
+                            <th class="py-3 px-6 text-left border-b">Sesi</th>
+                            <th class="py-3 px-6 text-left border-b">Waktu</th>
+                            <th class="py-3 px-6 text-center border-b">Kuota</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($jadwals as $index => $jadwal)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>
+                        @php $no = 1; @endphp
+                        @foreach ($mataKuliahs as $matkul)
+                            @foreach ($matkul->tanggals as $index => $tanggal)
+                                @foreach ($tanggal->jadwals as $jadwalIndex => $jadwal)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-4 text-center border-b">{{ $no++ }}</td>
+                                        @if ($index === 0 && $jadwalIndex === 0)
+                                            <td class="py-3 px-6 border-b"
+                                                rowspan="{{ $matkul->tanggals->sum(function ($tanggal) {return $tanggal->jadwals->count();}) }}">
+                                                {{ $matkul->matkul }}
+                                            </td>
+                                        @endif
+                                        @if ($jadwalIndex === 0)
+                                            <td class="py-3 px-6 border-b" rowspan="{{ $tanggal->jadwals->count() }}">
+                                                {{ \Carbon\Carbon::parse($tanggal->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
+                                            </td>
+                                        @endif
+                                        <td class="py-3 px-6 border-b">{{ $jadwal->sesi }}</td>
+                                        <td class="py-3 px-6 border-b">
+                                            {{ \Carbon\Carbon::parse($jadwal->waktu_mulai)->format('H:i') }}-
+                                            {{ \Carbon\Carbon::parse($jadwal->waktu_selesai)->format('H:i') }}</td>
+                                        <td class="py-3 px-6 text-center border-b">
+                                            @php
+                                                $kuotaPercentage = ($jadwal->kuota / 40) * 100; // Asumsi kuota maksimal 40
+                                                $statusClass = '';
+                                                $statusText = '';
 
-                                    {{-- {{ $formattedDate }} --}}
-                                </td>
-                                <td>{{ $jadwal->sesi }}</td>
-                                <td>{{ \Carbon\Carbon::parse($jadwal->waktu_mulai)->format('H:i') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($jadwal->waktu_selesai)->format('H:i') }}</td>
-                                <td>
-                                    @if ($jadwal->kuota >= 10)
-                                        <span class="badge bg-success">Tersedia ({{ $jadwal->kuota }})</span>
-                                    @elseif($jadwal->kuota > 0)
-                                        <span class="badge bg-warning">Terbatas ({{ $jadwal->kuota }})</span>
-                                    @else
-                                        <span class="badge bg-danger">Penuh</span>
-                                    @endif
-                                </td>
-                            </tr>
+                                                if ($jadwal->kuota <= 0) {
+                                                    $statusClass = 'bg-red-100 text-red-800';
+                                                    $statusText = 'Habis';
+                                                } elseif ($jadwal->kuota <= 5) {
+                                                    $statusClass = 'bg-yellow-100 text-yellow-800';
+                                                    $statusText = 'Terbatas';
+                                                } else {
+                                                    $statusClass = 'bg-green-100 text-green-800';
+                                                    $statusText = 'Tersedia';
+                                                }
+                                            @endphp
+                                            <div class="flex items-center justify-center">
+                                                <span class="px-2 py-1 rounded text-sm {{ $statusClass }}">
+                                                    {{ $jadwal->kuota }} ({{ $statusText }})
+                                                </span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                                <div class="rounded-full h-2 
+                                                    @if ($jadwal->kuota <= 0) bg-red-500
+                                                    @elseif($jadwal->kuota <= 10) bg-yellow-500
+                                                    @else bg-green-500 @endif"
+                                                    style="width: {{ $kuotaPercentage }}%">
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>
-
             </div>
         </div>
     </section>
@@ -209,41 +243,6 @@
             <h2 class="mb-4">Siap untuk Memulai Perjalanan Praktikum Anda?</h2>
             <p class="lead mb-4">Daftar sekarang dan tingkatkan keterampilan laboratorium Anda bersama kami!</p>
             <a href="#" class="btn btn-light btn-lg">Daftar Sekarang</a>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section class="py-5" id="contact">
-        <div class="container">
-            <h2 class="text-center mb-5">Hubungi Kami</h2>
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <form class="animate-on-scroll">
-                        <div class="mb-3">
-                            <input type="text" class="form-control" placeholder="Nama Anda">
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" class="form-control" placeholder="Email Anda">
-                        </div>
-                        <div class="mb-3">
-                            <textarea class="form-control" rows="5" placeholder="Pesan Anda"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Kirim Pesan</button>
-                    </form>
-                </div>
-                <div class="col-md-6 mb-4 animate-on-scroll">
-                    <h5>Lokasi Kami</h5>
-                    <p><i class="fas fa-map-marker-alt me-2"></i>Jl. Universitas No. 123, Kota Ilmu, 12345</p>
-                    <h5>Informasi Kontak</h5>
-                    <p><i class="fas fa-phone me-2"></i>(021) 123-4567</p>
-                    <p><i class="fas fa-envelope me-2"></i>info@labpraktikum.ac.id</p>
-                    <h5>Ikuti Kami</h5>
-                    <a href="#" class="text-dark me-2"><i class="fab fa-facebook fa-2x"></i></a>
-                    <a href="#" class="text-dark me-2"><i class="fab fa-twitter fa-2x"></i></a>
-                    <a href="#" class="text-dark me-2"><i class="fab fa-instagram fa-2x"></i></a>
-                    <a href="#" class="text-dark me-2"><i class="fab fa-linkedin fa-2x"></i></a>
-                </div>
-            </div>
         </div>
     </section>
 

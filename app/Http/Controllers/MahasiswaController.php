@@ -7,8 +7,7 @@ use App\Models\Kelas;
 use App\Models\Tanggal;
 use App\Models\MataKuliah;
 use App\Models\Mahasiswa;
-use App\Models\Ruangan;
-use App\Models\PenanggungJawab;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -20,8 +19,8 @@ class MahasiswaController extends Controller
 {
     public function halaman()
     {
-        $jadwals = Jadwal::all();
-        return view('user.halaman', compact('jadwals'));
+        $mataKuliahs = MataKuliah::with(['tanggals.jadwals'])->get();
+        return view('user.halaman', compact('mataKuliahs'));
     }
     public function dash()
     {
@@ -86,7 +85,7 @@ class MahasiswaController extends Controller
             // Kurangi kuota
             $jadwal->decrement('kuota');
 
-            // Simpan data mahasiswa
+            // Simpan data mahasiswa tanpa mengisi kolom `penanggung_jawab` dan `id_jadwal`
             $mahasiswa = new Mahasiswa();
             $mahasiswa->tanggal = $tanggal->tanggal;
             $mahasiswa->nama = $request->nama;
@@ -98,7 +97,7 @@ class MahasiswaController extends Controller
             $mahasiswa->kuota = $jadwal->kuota; // Kuota setelah dikurangi
             $mahasiswa->sesi = $jadwal->sesi;
             $mahasiswa->kelas = $request->kelas;
-            $mahasiswa->id_jadwal = $jadwal->id_jadwal; // Simpan ID jadwal jika diperlukan
+            // Jangan isi `penanggung_jawab` dan `id_jadwal`
 
             $mahasiswa->save();
 
@@ -119,12 +118,13 @@ class MahasiswaController extends Controller
             ], 422);
         }
     }
+
     public function mahasiswa(Request $request)
     {
         $tanggals = Tanggal::all();
         $jadwals = Jadwal::all();
         $matkuls = MataKuliah::all();
-        $mahasiswas = Mahasiswa::with(['ruangan', 'penanggungJawab'])->get();
+        $mahasiswas = Mahasiswa::all();
         return view('admin.mahasiswa', compact('mahasiswas', 'tanggals', 'jadwals', 'matkuls',));
     }
     public function min()
@@ -134,5 +134,64 @@ class MahasiswaController extends Controller
     public function dashboard()
     {
         return view('admin.dashboard');
+    }
+    public function updateRuangan(Request $request)
+    {
+        $request->validate([
+            'mahasiswa_id' => 'required|exists:mahasiswa,id',
+            'ruangan' => 'required|string',
+            'penanggung_jawab' => 'required|string'
+        ]);
+
+        $mahasiswa = Mahasiswa::find($request->mahasiswa_id);
+        $mahasiswa->ruangan = $request->ruangan;
+        $mahasiswa->penanggung_jawab = $request->penanggung_jawab;
+        $mahasiswa->save();
+
+        return redirect()->back()->with('success', 'Data ruangan dan penanggung jawab berhasil diperbarui.');
+    }
+    public function delete(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Cari data mahasiswa berdasarkan ID
+            $mahasiswa = Mahasiswa::findOrFail($id);
+
+            // Ambil ID jadwal sebelum data dihapus
+            $jadwalId = $mahasiswa->id_jadwal;
+
+            // Hapus data mahasiswa
+            $mahasiswa->delete();
+
+            if ($jadwalId) {
+                $jadwal = Jadwal::findOrFail($jadwalId);
+                $oldQuota = $jadwal->kuota;
+
+                // Tambah kuota
+                $jadwal->kuota += 1;
+                $jadwal->save();
+
+                // Log perubahan kuota
+                Log::info('Kuota berhasil ditambah', [
+                    'jadwal_id' => $jadwalId,
+                    'kuota_lama' => $oldQuota,
+                    'penambahan' => 1,
+                    'kuota_baru' => $jadwal->kuota
+                ]);
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dihapus dan kuota berhasil ditambah'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus data'
+            ], 500);
+        }
     }
 }

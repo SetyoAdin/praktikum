@@ -90,44 +90,6 @@ class MataKuliahController extends Controller
             return response()->json(['success' => false, 'message' => 'Gagal menambah tanggal: ' . $e->getMessage()]);
         }
     }
-    public function deleteMatkul($id)
-    {
-        try {
-            DB::beginTransaction();
-
-            // Cari mata kuliah
-            $matkul = MataKuliah::findOrFail($id);
-
-            // Ambil semua id tanggal terkait
-            $tanggalIds = Tanggal::where('id_mata_kuliah', $id)->pluck('id_tanggal');
-
-            // Hapus jadwal terkait
-            if (!empty($tanggalIds)) {
-                Jadwal::whereIn('id_tanggal', $tanggalIds)->delete();
-            }
-
-            // Hapus tanggal terkait
-            Tanggal::where('id_mata_kuliah', $id)->delete();
-
-            // Hapus mata kuliah
-            $matkul->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Mata kuliah dan data terkait berhasil dihapus'
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error deleting mata kuliah: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus mata kuliah: ' . $e->getMessage()
-            ], 500);
-        }
-    }
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -139,5 +101,40 @@ class MataKuliahController extends Controller
         $mataKuliah->save();
 
         return response()->json(['success' => true]);
+    }
+    public function destroyMataKuliah($id)
+    {
+        try {
+            $matkul = MataKuliah::findOrFail($id);
+            $matkul->delete(); // Akan otomatis menghapus tanggal dan jadwal terkait karena cascade
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mata kuliah berhasil dihapus beserta semua data terkait'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus mata kuliah: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroyTanggal($id)
+    {
+        try {
+            $tanggal = Tanggal::findOrFail($id);
+            $tanggal->delete(); // Akan otomatis menghapus jadwal terkait karena cascade
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tanggal berhasil dihapus beserta jadwal terkait'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus tanggal: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

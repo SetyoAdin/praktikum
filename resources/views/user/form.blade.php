@@ -93,13 +93,14 @@
                 </select>
             </div>
             <a href="/halaman" type="submit" class="btn btn-warning">Kembali</a>
-            <button type="submit" class="btn btn-primary">Kirim</button>
+            <button type="button" class="btn btn-primary" onclick="confirmSubmit()">Kirim</button>
         </form>
 
     </div>
 
     <!-- Bootstrap JS (optional, for certain features) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const matkulSelect = document.getElementById('mata_kuliah');
@@ -257,6 +258,214 @@
                         submitButton.disabled = false;
                     });
             });
+        });
+        //Alert success
+        document.addEventListener('DOMContentLoaded', function() {
+            const matkulSelect = document.getElementById('mata_kuliah');
+            const tanggalSelect = document.getElementById('tanggal');
+            const sesiSelect = document.getElementById('sesi');
+
+            // Event listener untuk mata kuliah
+            matkulSelect.addEventListener('change', function() {
+                const matkulId = this.value;
+                resetTanggalSelect();
+                resetSesiSelect();
+                resetFormFields();
+
+                if (matkulId) {
+                    fetch(`/get-tanggal/${matkulId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            tanggalSelect.innerHTML = '<option value="">Pilih Tanggal</option>';
+                            if (data.length > 0) {
+                                data.forEach(item => {
+                                    const option = document.createElement('option');
+                                    option.value = item.id_tanggal;
+                                    option.textContent = formatTanggal(item.tanggal);
+                                    tanggalSelect.appendChild(option);
+                                });
+                                tanggalSelect.disabled = false;
+                            } else {
+                                tanggalSelect.innerHTML = '<option value="">Tidak ada tanggal</option>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            tanggalSelect.innerHTML = '<option value="">Error loading dates</option>';
+                        });
+                }
+            });
+
+            // Event listener untuk tanggal
+            tanggalSelect.addEventListener('change', function() {
+                const tanggalId = this.value;
+                resetSesiSelect();
+                resetFormFields();
+
+                if (tanggalId) {
+                    fetch(`/get-sesi/${tanggalId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Reset dan set default option
+                            sesiSelect.innerHTML = '<option value="">Pilih Sesi</option>';
+
+                            if (data.length > 0) {
+                                data.forEach(jadwal => {
+                                    const option = document.createElement('option');
+                                    option.value = jadwal.id_jadwal;
+                                    option.textContent = jadwal.sesi;
+                                    sesiSelect.appendChild(option);
+                                });
+                                sesiSelect.disabled = false;
+                            } else {
+                                sesiSelect.innerHTML =
+                                    '<option value="">Tidak ada sesi tersedia</option>';
+                                sesiSelect.disabled = true;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            sesiSelect.innerHTML = '<option value="">Error loading sessions</option>';
+                            sesiSelect.disabled = true;
+                        });
+                }
+            });
+
+            // Event listener untuk sesi
+            sesiSelect.addEventListener('change', function() {
+                const jadwalId = this.value;
+                resetFormFields();
+
+                if (jadwalId) {
+                    fetch(`/get-jadwal-detail/${jadwalId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('waktuMulai').value = data.waktu_mulai;
+                            document.getElementById('waktuSelesai').value = data.waktu_selesai;
+                            document.getElementById('kuota').value = data.kuota;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            resetFormFields();
+                        });
+                }
+            });
+
+            // Helper functions untuk reset select dan fields
+            function resetTanggalSelect() {
+                tanggalSelect.innerHTML = '<option value="">Pilih Tanggal</option>';
+                tanggalSelect.disabled = true;
+            }
+
+            function resetSesiSelect() {
+                sesiSelect.innerHTML = '<option value="">Pilih Sesi</option>';
+                sesiSelect.disabled = true;
+            }
+
+            function resetFormFields() {
+                document.getElementById('waktuMulai').value = '';
+                document.getElementById('waktuSelesai').value = '';
+                document.getElementById('kuota').value = '';
+            }
+
+            function formatTanggal(tanggal) {
+                return new Date(tanggal).toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+
+            // Function to handle form submission with SweetAlert
+            window.confirmSubmit = function() {
+                // Get form data
+                const form = document.getElementById('mahasiswaForm');
+                const formData = new FormData(form);
+
+                // Validate required fields
+                const requiredFields = ['mata_kuliah', 'tanggal', 'sesi', 'nama', 'nim', 'kelas'];
+                const emptyFields = requiredFields.filter(field => !formData.get(field));
+
+                if (emptyFields.length > 0) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Mohon lengkapi semua field yang diperlukan',
+                        icon: 'error'
+                    });
+                    return;
+                }
+
+                // Show confirmation dialog
+                Swal.fire({
+                    title: 'Konfirmasi Data',
+                    html: `
+                <div class="text-left">
+                    <p><strong>Nama:</strong> ${formData.get('nama')}</p>
+                    <p><strong>NIM:</strong> ${formData.get('nim')}</p>
+                    <p><strong>Kelas:</strong> ${formData.get('kelas')}</p>
+                    <p><strong>Mata Kuliah:</strong> ${document.querySelector('#mata_kuliah option:checked').text}</p>
+                    <p><strong>Sesi:</strong> ${document.querySelector('#sesi option:checked').text}</p>
+                    <p><strong>Waktu:</strong> ${formData.get('waktu_mulai')} - ${formData.get('waktu_selesai')}</p>
+                </div>
+                <p class="text-warning mt-3">Harap cek kembali data Anda sebelum mengirim!</p>
+            `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Kirim!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Sedang Memproses...',
+                            html: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Submit form data
+                        fetch(form.getAttribute('action'), {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')
+                                        .value,
+                                    'Accept': 'application/json'
+                                },
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    Swal.fire({
+                                        title: 'Berhasil!',
+                                        text: result.message,
+                                        icon: 'success',
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        window.location.href = '/halaman';
+                                    });
+                                } else {
+                                    throw new Error(result.message);
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire({
+                                    title: 'Gagal!',
+                                    text: error.message ||
+                                        'Terjadi kesalahan saat mengirim data',
+                                    icon: 'error'
+                                });
+                            });
+                    }
+                });
+            };
         });
     </script>
 

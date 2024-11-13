@@ -60,13 +60,19 @@ Route::post('/insertkelas', [KelasController::class, 'store'])->name('insertkela
 Route::post('/reset-password/{email}', [AuthController::class, 'updatePassword'])->middleware('auth');
 Route::post('/user/update-name', 'AuthController@updateName');
 Route::post('/update-username', [AuthController::class, 'updateUsername'])->name('update.username');
+Route::post('/mahasiswa/update-ruangan', [MahasiswaController::class, 'updateRuangan'])->name('mahasiswa.updateRuangan');
+// Route::post('/mahasiswa/delete/{id}', [MahasiswaController::class, 'delete'])->name('mahasiswa.delete');
+
 
 //ROUTE DELETE
-Route::delete('/delmatkul/{id}', [MatakuliahController::class, 'deleteMatkul'])->name('delmatkul');
+// Route::delete('/delmatkul/{id}', [MatakuliahController::class, 'deleteMatkul'])->name('delmatkul');
 Route::delete('/user/{id}', [AuthController::class, 'deleteUser'])->name('user.delete');
-Route::delete('/hapus/{id_tanggal}', [TanggalController::class, 'hapusData'])->name('hapustgl');
+// Route::delete('/hapus/{id_tanggal}', [TanggalController::class, 'hapusData'])->name('hapustgl');
 Route::delete('/tanggal/{id}', [TanggalController::class, 'destroy'])->name('tanggal.destroy');
 Route::delete('/auth/{id}', [AuthController::class, 'destroy'])->name('auth.destroy');
-Route::delete('/jadwal/{id_tanggal}', [JadwalController::class, 'confirmDelete'])->name('jadwal.delete');
-Route::delete('/tanggal/{id}', [TanggalController::class, 'destroy'])
-    ->name('tanggal.destroy');
+// Route::delete('/jadwal/{id_tanggal}', [JadwalController::class, 'confirmDelete'])->name('jadwal.delete');
+// Route::delete('/tanggal/{id}', [TanggalController::class, 'destroy'])
+//     ->name('tanggal.destroy');
+Route::delete('/mata-kuliah/{id}', [MatakuliahController::class, 'destroyMataKuliah'])->name('matkul.destroy');
+Route::delete('/tanggal/{id}', [MatakuliahController::class, 'destroyTanggal'])->name('tanggal.destroy');
+Route::delete('/mahasiswa/delete/{id}', [MahasiswaController::class, 'delete'])->name('mahasiswa.delete');
