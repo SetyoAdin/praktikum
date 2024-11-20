@@ -248,45 +248,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Chart Section -->
-            <section id="data" class="section">
-                <h2 class="section-title">Data Visualization</h2>
-                <div class="chart-container">
-                    <canvas id="myChart"></canvas>
-                </div>
-            </section>
-
-            <!-- Table Section -->
-            <section id="table" class="section">
-                <h2 class="section-title">Data Table</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>John Doe</td>
-                                <td>Active</td>
-                                <td>$120</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jane Smith</td>
-                                <td>Inactive</td>
-                                <td>$80</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
             @if (session('login_success'))
                 <script>
                     document.addEventListener("DOMContentLoaded", function() {
