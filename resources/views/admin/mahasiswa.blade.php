@@ -9,6 +9,7 @@
         </button>
 
         <div class="table-responsive">
+            <!-- Tabel -->
             <table id="mataKuliahTable" class="table table-striped">
                 <thead>
                     <tr>
