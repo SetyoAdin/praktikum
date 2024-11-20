@@ -241,16 +241,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Modal Structure -->
-                                <div id="dynamicModal" style="display: none;">
-                                    <div class="modal-content">
-                                        <span class="close-button" onclick="hideMataKuliahModal()">×</span>
-                                        <h4 class="mb-3">Daftar Mata Kuliah</h4>
-                                        <div id="mataKuliahContainer">
-                                            <!-- Dynamic Mata Kuliah Fields Will Be Injected Here -->
-                                        </div>
-                                    </div>
-                                </div>
                             @endforeach
                         </tbody>
                     </table>

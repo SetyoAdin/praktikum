@@ -231,16 +231,20 @@
                 <h2 class="section-title">Overview</h2>
                 <div class="cards">
                     <div class="card">
-                        <h3>Users</h3>
-                        <p>1500</p>
+                        <h3 class="text-lg font-semibold text-gray-700">Pendaftar</h3>
+                        <p class="text-3xl font-bold text-blue-600 mt-2">{{ $jumlahMahasiswa }}</p>
                     </div>
                     <div class="card">
-                        <h3>Revenue</h3>
-                        <p>$5,200</p>
+                        <h3 class="text-lg font-semibold text-gray-700">Mata Kuliah</h3>
+                        <p class="text-3xl font-bold text-blue-600 mt-2">{{ $jumlahMatakuliah }}</p>
                     </div>
                     <div class="card">
-                        <h3>New Orders</h3>
-                        <p>300</p>
+                        <h3 class="text-lg font-semibold text-gray-700">Tanggal</h3>
+                        <p class="text-3xl font-bold text-blue-600 mt-2">{{ $jumlahTanggal }}</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-gray-700">Kelas</h3>
+                        <p class="text-3xl font-bold text-blue-600 mt-2">{{ $jumlahKelas }}</p>
                     </div>
                 </div>
             </section>
