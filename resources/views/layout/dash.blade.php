@@ -556,7 +556,7 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo">AdminDash</div>
+                <div class="sidebar-logo">UMM.Dash</div>
             </div>
             <nav class="sidebar-menu">
                 <div class="menu-section">

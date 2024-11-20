@@ -131,9 +131,21 @@ class MahasiswaController extends Controller
     {
         return view('admin.min');
     }
+
+
     public function dashboard()
     {
-        return view('admin.dashboard');
+        $jumlahMahasiswa = Mahasiswa::count();
+        $jumlahMatakuliah = MataKuliah::count();
+        $jumlahTanggal = Tanggal::count();
+        $jumlahKelas = Kelas::count();
+
+        return view('admin.dashboard', [
+            'jumlahMahasiswa' => $jumlahMahasiswa,
+            'jumlahMatakuliah' => $jumlahMatakuliah,
+            'jumlahTanggal' => $jumlahTanggal,
+            'jumlahKelas' => $jumlahKelas
+        ]);
     }
     public function updateRuangan(Request $request)
     {
