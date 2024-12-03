@@ -402,6 +402,40 @@
                     </table>
                 </div>
             </div>
+            <div class="table-card">
+                <h3 class="card-title">Daftar Kelas</h3>
+                <div class="table-responsive">
+                    <table id="mataKuliahTable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Kelas</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($kelas as $kelas)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $kelas->kelas }}</td>
+                                    <td>
+
+                                        <button type="button" class="icon-button delete-btn">
+                                            <i class="fas fa-trash-alt trash-icon"></i>
+                                        </button>
+
+
+                                        <a href="#" class="icon-button">
+                                            <i class="fas fa-pencil-alt edit-icon"></i>
+                                        </a>
+
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 

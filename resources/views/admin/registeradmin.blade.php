@@ -53,6 +53,10 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             /* Bayangan */
         }
+
+        .input-group .toggle-password {
+            border-left: none;
+        }
     </style>
     <div class="container-fluid py-5">
         <!-- Form Card -->
@@ -101,17 +105,30 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" id="password" class="form-control" required>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control" required>
+                                <button class="btn btn-outline-secondary toggle-password" type="button"
+                                    data-target="password">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
                             <div class="invalid-feedback">Password wajib diisi.</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation"
-                                class="form-control" required>
+                            <div class="input-group">
+                                <input type="password" name="password_confirmation" id="password_confirmation"
+                                    class="form-control" required>
+                                <button class="btn btn-outline-secondary toggle-password" type="button"
+                                    data-target="password_confirmation">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
                             <div class="invalid-feedback">Konfirmasi password wajib diisi.</div>
                         </div>
                     </div>
+
                     <div class="col-md-6 mb-3">
                         <select name="role" id="role" class="form-select" required>
                             <option value="">Pilih Role</option>
@@ -419,6 +436,19 @@
                     // Tampilkan modal
                     var editModal = new bootstrap.Modal(document.getElementById('editModal'), {});
                     editModal.show();
+                });
+            });
+            // Icon mata pada password
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const target = document.getElementById(this.dataset.target);
+                    if (target.type === 'password') {
+                        target.type = 'text';
+                        this.querySelector('i').classList.replace('fa-eye', 'fa-eye-slash');
+                    } else {
+                        target.type = 'password';
+                        this.querySelector('i').classList.replace('fa-eye-slash', 'fa-eye');
+                    }
                 });
             });
         </script>

@@ -249,7 +249,7 @@
     <!-- Footer -->
     <footer class="footer text-center">
         <div class="container">
-            <span>&copy; 2024 LabPraktikum. Hak Cipta Dilindungi.</span>
+            <span>&copy; Universitas Muhamadyah Malang.</span>
         </div>
     </footer>
 

@@ -4,7 +4,7 @@
         <h3 class="card-title">Daftar Mata Kuliah</h3>
 
         <!-- Button untuk Membuka Modal -->
-        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#updateRuanganModal">
+        <button type="button" class="btn btn-custom mb-3" data-bs-toggle="modal" data-bs-target="#updateRuanganModal">
             Tambah Ruangan dan Penanggung Jawab
         </button>
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\MataKuliah;
 use App\Models\Jadwal;
 use App\Models\Tanggal;
+use App\Models\Kelas;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -16,7 +17,8 @@ class MataKuliahController extends Controller
         $mata_kuliahs = MataKuliah::all();
         $jadwals = Jadwal::all();
         $tanggals = Tanggal::all();
-        return view('admin.matkul', compact('mata_kuliahs', 'jadwals', 'tanggals'));
+        $kelas = Kelas::all();
+        return view('admin.matkul', compact('mata_kuliahs', 'jadwals', 'tanggals', 'kelas'));
     }
 
     public function insertMatkul(Request $request)

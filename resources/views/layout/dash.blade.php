@@ -642,7 +642,7 @@
 
             <!-- Footer -->
             <footer class="footer">
-                <p>&copy; 2024 AdminDash. All rights reserved.</p>
+                <p>&copy; Universitas Muhammadiyah Malang.</p>
             </footer>
         </div>
     </div>
