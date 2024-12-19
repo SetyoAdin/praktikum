@@ -57,12 +57,84 @@
         .input-group .toggle-password {
             border-left: none;
         }
+
+        /*HANDEL DATA TABEL */
+        /* Search Bar Styling */
+        .dataTables_wrapper .dataTables_filter {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 6px 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dataTables_wrapper .dataTables_filter input:focus {
+            border-color: #2c3e50;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Show Entries Styling */
+        .dataTables_wrapper .dataTables_length {
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 6px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .dataTables_wrapper .dataTables_length select:focus {
+            border-color: #2c3e50;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Pagination Styling */
+        .dataTables_wrapper .dataTables_paginate {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 6px 12px;
+            margin: 0 2px;
+            color: #2c3e50;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            color: #fff;
+            background-color: #2c3e50;
+            border-color: #2c3e50;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #2c3e50;
+            color: #fff !important;
+            border-color: #2c3e50;
+        }
+
+        .text-primary {
+            color: #2c3e50 !important;
+        }
     </style>
     <div class="container-fluid py-5">
         <!-- Form Card -->
         <div class="card shadow-sm border-0 rounded-lg mx-auto" style="width: 100%; max-width: 1000px; max-height: 80vh;">
             <div class="card-body">
-                <h2 class="h4 mb-4 text-center text-primary font-weight-bold">Buat Akun Baru</h2>
+                <h2 class="h4 mb-4 text-center text-primary font-weight-bold" style="color: #2c3e50">Buat Akun Baru</h2>
 
                 <!-- Success and Error Alerts -->
                 @if (session('success'))
@@ -187,7 +259,7 @@
         <!-- Table Card -->
         <div class="card shadow-sm border-0 rounded-lg mx-auto mt-4" style="width: 100%; max-width: 1000px;">
             <div class="card-body">
-                <h2 class="h4 mb-4 text-center text-primary font-weight-bold">Daftar Pengguna</h2>
+                <h2 class="h4 mb-4 text-center text-primary color:#2c3e50 font-weight-bold">Daftar Pengguna</h2>
                 <table id="userTable" class="table table-striped table-hover">
                     <thead class="table-primary">
                         <tr>
@@ -255,19 +327,36 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
+            //HANDEL DATATABLE ADMIN
             $(document).ready(function() {
-                // Inisialisasi DataTable
-                var table = $('#userTable').DataTable();
-
-                // Pencarian menggunakan input custom
-                $('#searchInput').on('keyup', function() {
-                    table.search(this.value).draw();
+                $('#userTable').DataTable({
+                    paging: true, // Enable pagination
+                    lengthMenu: [5, 10, 20], // Options for entries per page
+                    searching: true, // Enable search bar
+                    info: true, // Show table info
+                    language: {
+                        lengthMenu: "Show _MENU_ entries", // Custom text for "Show entries"
+                        search: "Search:", // Custom text for search bar
+                        paginate: {
+                            next: "Next", // Next button
+                            previous: "Previous", // Previous button
+                        },
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries", // Pagination info
+                        infoEmpty: "Showing 0 to 0 of 0 entries", // Info for no data
+                        infoFiltered: "(filtered from _MAX_ total entries)", // Filtered info
+                    },
+                    columnDefs: [{
+                        orderable: false,
+                        targets: [3] // Disable sorting for the action column
+                    }],
                 });
             });
+
+
+
             document.addEventListener("DOMContentLoaded", function() {
                 // Mengambil email dari server
                 fetch('/get-emails')

@@ -42,6 +42,9 @@ Route::get('/get-jadwal-detail/{jadwalId}', [JadwalController::class, 'getJadwal
 Route::put('/mata-kuliah/{id}', [MataKuliahController::class, 'update']);
 Route::put('/updatetanggal/{id}', [TanggalController::class, 'updateTanggal'])->name('updatetanggal');
 Route::put('/user/update/{id}', [AuthController::class, 'updateNama'])->name('user.update');
+// routes/web.php
+Route::put('/editkelas/{id}', [KelasController::class, 'editkelas']);
+
 //MIDELWARE(ADMIN)
 
 
@@ -63,7 +66,6 @@ Route::post('/update-username', [AuthController::class, 'updateUsername'])->name
 Route::post('/mahasiswa/update-ruangan', [MahasiswaController::class, 'updateRuangan'])->name('mahasiswa.updateRuangan');
 // Route::post('/mahasiswa/delete/{id}', [MahasiswaController::class, 'delete'])->name('mahasiswa.delete');
 
-
 //ROUTE DELETE
 // Route::delete('/delmatkul/{id}', [MatakuliahController::class, 'deleteMatkul'])->name('delmatkul');
 Route::delete('/user/{id}', [AuthController::class, 'deleteUser'])->name('user.delete');
@@ -75,4 +77,7 @@ Route::delete('/auth/{id}', [AuthController::class, 'destroy'])->name('auth.dest
 //     ->name('tanggal.destroy');
 Route::delete('/mata-kuliah/{id}', [MatakuliahController::class, 'destroyMataKuliah'])->name('matkul.destroy');
 Route::delete('/tanggal/{id}', [MatakuliahController::class, 'destroyTanggal'])->name('tanggal.destroy');
-Route::delete('/mahasiswa/delete/{id}', [MahasiswaController::class, 'delete'])->name('mahasiswa.delete');
+Route::delete('/kelas/{id}', [KelasController::class, 'destroy'])->name('kelas.destroy');
+Route::delete('/hapus-sesi/{id}', [JadwalController::class, 'delete'])->name('jadwal.delete');
+Route::delete('/jadwal/delete/{id}', [JadwalController::class, 'destroy'])->name('jadwal.destroy');
+Route::delete('/mahasiswa/delete/{id}', [MahasiswaController::class, 'deleteMahasiswaDanTambahKuota']);

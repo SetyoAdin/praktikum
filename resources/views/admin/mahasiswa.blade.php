@@ -1,5 +1,73 @@
 @extends('layout.dash')
 @section('content')
+    <style>
+        /* Search Bar Styling */
+        .dataTables_wrapper .dataTables_filter {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px 10px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dataTables_wrapper .dataTables_filter input:focus {
+            border-color: #2c3e50;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Show Entries Styling */
+        .dataTables_wrapper .dataTables_length {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .dataTables_wrapper .dataTables_length select:focus {
+            border-color: #2c3e50;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Pagination Styling */
+        .dataTables_wrapper .dataTables_paginate {
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px 10px;
+            margin: 0 2px;
+            color: #2c3e50;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            color: #fff;
+            background-color: #2c3e50;
+            border-color: #2c3e50;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #2c3e50;
+            color: #fff !important;
+            border-color: #2c3e50;
+        }
+    </style>
     <div class="table-card">
         <h3 class="card-title">Daftar Mata Kuliah</h3>
 
@@ -42,10 +110,10 @@
                             <td>{{ $mahasiswa->ruangan }}</td>
                             <td>{{ $mahasiswa->penanggung_jawab }}</td>
                             <td>
-                                <a href="#" class="icon-button"
-                                    onclick="confirmDelete('{{ $mahasiswa->id }}', '{{ $mahasiswa->id_jadwal }}')">
-                                    <i class="fas fa-trash-alt delete-icon"></i>
+                                <a href="#" class="icon-button" onclick="confirmDelete('{{ $mahasiswa->id }}')">
+                                    <i class="fas fa-trash-alt delete-icon" style="color: red"></i>
                                 </a>
+
 
                             </td>
                         </tr>
@@ -102,12 +170,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 
     <script>
-        function confirmDelete(mahasiswaId, jadwalId) {
+        function confirmDelete(mahasiswaId) {
             Swal.fire({
                 title: 'Apakah Anda yakin?',
-                text: "Data ini akan dihapus secara permanen!",
+                text: "Data mahasiswa akan dihapus secara permanen!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -116,49 +186,76 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    deleteMahasiswa(mahasiswaId, jadwalId);
+                    // Dapatkan CSRF token dari meta tag
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                    fetch(`/mahasiswa/delete/${mahasiswaId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': token,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            // Pastikan response dalam bentuk JSON
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Berhasil!',
+                                    text: data.message || 'Data mahasiswa berhasil dihapus',
+                                    icon: 'success',
+                                    timer: 1500
+                                }).then(() => {
+                                    location.reload(); // Reload halaman
+                                });
+                            } else {
+                                // Jika response success = false
+                                Swal.fire({
+                                    title: 'Gagal!',
+                                    text: data.message || 'Terjadi kesalahan saat menghapus data',
+                                    icon: 'error'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            // Tangani error jaringan atau parsing
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan saat mengirim request',
+                                icon: 'error'
+                            });
+                            console.error('Error:', error);
+                        });
                 }
             });
         }
-
-        function deleteMahasiswa(mahasiswaId, jadwalId) {
-            // Dapatkan CSRF token dari meta tag
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-            fetch(`/mahasiswa/delete/${mahasiswaId}`, {
-                    method: 'DELETE', // Menggunakan method DELETE
-                    headers: {
-                        'X-CSRF-TOKEN': token,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+        //HANDEL DATA TABEL MAHASISWA
+        // HANDLE DATA TABEL MATA KULIAH
+        $(document).ready(function() {
+            $('#mataKuliahTable').DataTable({
+                paging: true,
+                lengthMenu: [5, 10, 20],
+                searching: true,
+                info: true,
+                language: {
+                    lengthMenu: "Show _MENU_ entries",
+                    search: "Search:",
+                    paginate: {
+                        next: "Next",
+                        previous: "Previous"
                     },
-                    body: JSON.stringify({
-                        jadwal_id: jadwalId
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Terhapus!',
-                            text: data.message,
-                            icon: 'success',
-                            timer: 1500
-                        }).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        throw new Error(data.message);
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: error.message || 'Terjadi kesalahan saat menghapus data',
-                        icon: 'error'
-                    });
-                });
-        }
-        // Alert
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    infoEmpty: "Showing 0 to 0 of 0 entries",
+                    infoFiltered: "(filtered from _MAX_ total entries)",
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: [2]
+                }, ],
+            });
+        });
     </script>
 @endsection

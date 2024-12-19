@@ -23,14 +23,14 @@ class TanggalController extends Controller
         $tanggals = Tanggal::all();
         return view('admin.tanggal', compact('jadwals', 'tanggals'));
     }
-    public function tambahtanggal(Request $request)
-    {
-        $tanggal = new Tanggal;
-        $tanggal->tanggal = $request->tanggal;
-        $tanggal->save();
+    // public function tambahtanggal(Request $request)
+    // {
+    //     $tanggal = new Tanggal;
+    //     $tanggal->tanggal = $request->tanggal;
+    //     $tanggal->save();
 
-        return redirect('/matkul');
-    }
+    //     return redirect('/matkul');
+    // }
     public function destroy($id_tanggal)
     {
         try {

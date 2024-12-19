@@ -32,6 +32,108 @@
         .col-md-5 {
             padding: 5px;
         }
+
+        //tabel kelas
+        #pagination {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+
+        .page-btn {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .page-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .page-btn:disabled {
+            cursor: not-allowed;
+            background-color: #f8f9fa;
+            border-color: #ccc;
+        }
+
+        /*HANDEL TAMPILAN DATA TABEL KELAS*/
+        /* Search Bar Styling */
+        .dataTables_wrapper .dataTables_filter {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #ddd;
+            /* Border ringan */
+            border-radius: 4px;
+            /* Membulatkan sudut */
+            padding: 5px 10px;
+            /* Padding dalam */
+            outline: none;
+            transition: all 0.3s ease;
+            /* Efek transisi */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Efek bayangan */
+        }
+
+        .dataTables_wrapper .dataTables_filter input:focus {
+            border-color: #2c3e50;
+            /* Warna fokus */
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+            /* Bayangan fokus */
+        }
+
+        /* Show Entries Styling */
+        .dataTables_wrapper .dataTables_length {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .dataTables_wrapper .dataTables_length select:focus {
+            border-color: #2c3e50;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Pagination Styling */
+        .dataTables_wrapper .dataTables_paginate {
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px 10px;
+            margin: 0 2px;
+            color: #2c3e50;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            color: #fff;
+            background-color: #2c3e50;
+            border-color: #2c3e50;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #2c3e50;
+            color: #fff !important;
+            border-color: #2c3e50;
+        }
     </style>
     <div class="container">
         <h1 class="page-title">Manajemen Jadwal</h1>
@@ -255,7 +357,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>Tanggal</th>
-                                <th></th>
+                                <th style="width: 3cm;"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -309,15 +411,15 @@
 
                                                 <form id="deleteForm{{ $tanggal->id_tanggal }}">
                                                     @foreach ($sesiJadwals as $jadwal)
-                                                        <div class="sesi-container mb-4">
+                                                        <div class="sesi-container mb-4"
+                                                            data-jadwal-id="{{ $jadwal->id_jadwal }}">
                                                             <div class="d-flex justify-content-between align-items-start">
                                                                 <h4 class="mb-3">{{ $jadwal->sesi }}</h4>
-                                                                <div class="checkbox-container" style="display: none;">
-                                                                    <input type="checkbox"
-                                                                        class="form-check-input delete-checkbox"
-                                                                        name="delete_sesi[]"
-                                                                        value="{{ $jadwal->id_jadwal }}"
-                                                                        data-modal-id="{{ $tanggal->id_tanggal }}">
+                                                                <div>
+                                                                    <button type="button" class="icon-button delete-btn"
+                                                                        onclick="deleteSesi('{{ $jadwal->id_jadwal }}')">
+                                                                        <i class="fas fa-trash-alt trash-icon"></i>
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                             <div class="row mb-2">
@@ -342,26 +444,35 @@
                                                             <hr class="my-4">
                                                         @endif
                                                     @endforeach
-                                                </form>
 
-                                                @if ($sesiJadwals->isEmpty())
-                                                    <div class="alert alert-info">
-                                                        Belum ada sesi yang tersedia untuk tanggal ini.
-                                                    </div>
-                                                @endif
+                                                    @if ($sesiJadwals->isEmpty())
+                                                        <div class="alert alert-info mt-5 text-center py-4">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                class="h-16 w-16 mx-auto mb-3 text-blue-500"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M9.172 16.172a4 4 0 015.656 0M9 12h.01M15 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            <h5 class="alert-heading mb-3">Belum Ada Sesi Tersedia</h5>
+                                                            <p class="mb-0">
+                                                                Tidak ada jadwal yang telah direncanakan untuk tanggal
+                                                                <strong>{{ \Carbon\Carbon::parse($tanggal->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</strong>.
+                                                                Silakan tambahkan sesi baru.
+                                                            </p>
+                                                        </div>
+                                                    @endif
+                                                </form>
                                             </div>
+
+
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-danger"
-                                                    onclick="toggleDeleteMode({{ $tanggal->id_tanggal }})">Hapus</button>
-                                                <button type="button" class="btn btn-warning batal-btn"
-                                                    style="display: none;"
-                                                    onclick="cancelDelete({{ $tanggal->id_tanggal }})">Batal</button>
-                                                <button type="button" class="btn btn-danger delete-session-btn"
-                                                    style="display: none;" disabled
-                                                    onclick="handleDeleteSession({{ $tanggal->id_tanggal }})">Hapus</button>
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Kembali</button>
+                                                <form action="{{ url()->current() }}" method="get">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-secondary">Kembali</button>
+                                                </form>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -402,241 +513,407 @@
                     </table>
                 </div>
             </div>
+            <!-- Daftar Kelas -->
             <div class="table-card">
                 <h3 class="card-title">Daftar Kelas</h3>
-                <div class="table-responsive">
-                    <table id="mataKuliahTable" class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Kelas</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($kelas as $kelas)
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="table-responsive mt-3">
+                        <table id="kelasTable" class="table table-striped">
+                            <thead>
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $kelas->kelas }}</td>
-                                    <td>
-
-                                        <button type="button" class="icon-button delete-btn">
-                                            <i class="fas fa-trash-alt trash-icon"></i>
-                                        </button>
-
-
-                                        <a href="#" class="icon-button">
-                                            <i class="fas fa-pencil-alt edit-icon"></i>
-                                        </a>
-
-                                    </td>
+                                    <th>No</th>
+                                    <th>Nama Kelas</th>
+                                    <th>Aksi</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($kelas as $item)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $item->kelas }}</td>
+                                        <td>
+                                            <button type="button" class="icon-button delete-btn"
+                                                onclick="confirmDeleteKelas({{ $item->id }})">
+                                                <i class="fas fa-trash-alt trash-icon"></i>
+                                            </button>
+                                            <button type="button" class="icon-button"
+                                                onclick="openKelasEditModal({{ $item->id }}, '{{ $item->kelas }}')">
+                                                <i class="fas fa-pencil-alt edit-icon"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <div class="modal fade" id="kelasEditModal" tabindex="-1"
+                                        aria-labelledby="kelasEditModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="kelasEditModalLabel">Edit Kelas</h5>
+                                                    <button type="button" class="btn-close" onclick="closeEditModal()"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="editKelasModalForm">
+                                                        @csrf
+                                                        <input type="hidden" id="kelasEditModalId" name="id">
+
+                                                        <div class="mb-3">
+                                                            <label for="kelasEditModalName" class="form-label">Nama
+                                                                Kelas</label>
+                                                            <input type="text" class="form-control"
+                                                                id="kelasEditModalName" name="kelas" required>
+                                                        </div>
+
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary"
+                                                                onclick="closeEditModal()">Batal</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan
+                                                                Perubahan</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        $(document).ready(function() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+        <script>
+            //HANDEL HAPUS SESI PADA TABEL JADWAL
+            function deleteSesi(idJadwal) {
+                fetch(`/jadwal/delete/${idJadwal}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Refresh atau hapus elemen sesi dari DOM jika berhasil
+                            document.querySelector(`[data-jadwal-id="${idJadwal}"]`).remove();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+            // HANDEL MODAL EDIT KELAS
+            function openKelasEditModal(id, kelas) {
+                $('#kelasEditModalId').val(id);
+                $('#kelasEditModalName').val(kelas);
+                $('#kelasEditModal').modal('show');
+            }
 
-            $('#id_mata_kuliah').select2({
-                placeholder: "Pilih Mata Kuliah",
-                allowClear: true
-            });
+            $(document).ready(function() {
+                $('#editKelasModalForm').on('submit', function(e) {
+                    e.preventDefault(); // Mencegah form refresh
 
-            // Initialize DataTables
-            var tanggalTable = $('#tanggalTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
-                },
-                "columnDefs": [{
-                    "orderable": false,
-                    "targets": 2
-                }]
-            });
+                    let id = $('#kelasEditModalId').val();
+                    let kelas = $('#kelasEditModalName').val();
 
-            var mataKuliahTable = $('#mataKuliahTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
-                },
-                "columnDefs": [{
-                    "orderable": false,
-                    "targets": 2
-                }]
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ambil elemen modal
-            var editModal = new bootstrap.Modal(document.getElementById('editModal'));
-
-            // Event listener untuk setiap ikon pensil
-            document.querySelectorAll('.edit-icon').forEach(function(icon) {
-                icon.addEventListener('click', function() {
-                    var id = this.getAttribute('data-id');
-                    var tanggal = this.getAttribute('data-tanggal');
-
-                    // Set nilai input tanggal
-                    document.getElementById('tanggal').value = tanggal;
-                    document.getElementById('id').value = id;
-
-                    // Mengatur action form
-                    var form = document.getElementById('editDateForm');
-                    form.action = form.action.replace('placeholder', id);
-                });
-            });
-        });
-        $(document).ready(function() {
-            $('.modal').modal({
-                backdrop: 'static',
-                keyboard: false
-            });
-            $('.modal').on('show.bs.modal', function() {
-                $(this).css({
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                });
-            });
-            $('.modal').on('shown.bs.modal', function() {
-                $('body').css('padding-right', '0');
-            });
-        });
-        $('.modal').on('show.bs.modal', function() {
-            $(this).css({
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            });
-        });
-
-        function closeModal(modalId) {
-            $(`#${modalId}`).modal('hide');
-        }
-
-        function deleteMatkul(id) {
-            fetch(`/delmatkul/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Hapus elemen dari DOM
-                        document.querySelector(`#delete-form-${id}`).closest('tr').remove();
-                        alert(data.message);
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat menghapus data');
-                });
-        }
-        document.getElementById('jadwalForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            let formData = new FormData(this);
-
-            fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Tutup modal jika ada
-                    let modal = bootstrap.Modal.getInstance(document.querySelector('.modal'));
-                    if (modal) {
-                        modal.hide();
-                    }
-
-                    // Tampilkan SweetAlert2 sesuai response
-                    if (data.status === 'success') {
+                    // Validasi input di sisi klien
+                    if (!kelas.trim()) {
                         Swal.fire({
-                            title: 'Berhasil!',
-                            text: data.message,
-                            icon: 'success',
-                            timerProgressBar: true,
-                            timer: 4500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            // Refresh halaman setelah alert tertutup
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: data.message,
                             icon: 'error',
-                            timerProgressBar: true,
-                            timer: 4500,
-                            showConfirmButton: false
+                            title: 'Error!',
+                            text: 'Nama kelas tidak boleh kosong.'
                         });
+                        return;
                     }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Terjadi kesalahan pada server',
-                        icon: 'error',
-                        timerProgressBar: true,
-                        timer: 5500,
-                        showConfirmButton: false
+
+                    // Kirim AJAX
+                    $.ajax({
+                        url: `/editkelas/${id}`, // Pastikan route benar
+                        type: 'PUT',
+                        dataType: 'json',
+                        data: {
+                            _token: $('meta[name="csrf-token"]').attr('content'),
+                            kelas: kelas
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.success || 'Kelas berhasil diupdate',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload(); // Refresh halaman
+                            });
+                        },
+                        error: function(xhr) {
+                            let response = xhr.responseJSON;
+
+                            if (response) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: response.message ||
+                                        'Terjadi kesalahan saat memperbarui data.'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: 'Terjadi kesalahan tak terduga.'
+                                });
+                            }
+                        }
                     });
                 });
-        });
+            });
 
+            //HANDLE DATA TABEL MATA KULIAH
+            $(document).ready(function() {
+                $('#mataKuliahTable').DataTable({
+                    paging: true,
+                    lengthMenu: [5, 10, 20],
+                    searching: true,
+                    info: true,
+                    language: {
+                        lengthMenu: "Show _MENU_ entries",
+                        search: "Search:",
+                        paginate: {
+                            next: "Next",
+                            previous: "Previous",
+                        },
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        infoEmpty: "Showing 0 to 0 of 0 entries",
+                        infoFiltered: "(filtered from _MAX_ total entries)",
+                    },
+                    columnDefs: [{
+                        orderable: false,
+                        targets: [2]
+                    }, ],
+                });
+            });
 
-        document.getElementById('mataKuliahForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-
-            // Disable button saat proses submit
-            submitButton.disabled = true;
-
-            fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
+            // HANDLE DATA TABLE JADWAL
+            $(document).ready(function() {
+                $('#tanggalTable').DataTable({
+                    "paging": true,
+                    "lengthMenu": [5, 10, 20],
+                    "searching": true,
+                    "info": true,
+                    "language": {
+                        "lengthMenu": "Show _MENU_ entries",
+                        "search": "Search:",
+                        "paginate": {
+                            "next": "Next",
+                            "previous": "Previous"
+                        },
+                        "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+                        "infoEmpty": "Showing 0 to 0 of 0 entries",
+                        "infoFiltered": "(filtered from _MAX_ total entries)"
                     }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Reset form
-                        this.reset();
+                });
+            });
 
-                        // Alert sukses
+
+
+            //HANDEL DATA TABEL KELAS
+            $(document).ready(function() {
+                $('#kelasTable').DataTable({
+                    "paging": true,
+                    "lengthMenu": [5, 10, 20],
+                    "searching": true,
+                    "info": true,
+                    "language": {
+                        "lengthMenu": "Show _MENU_ entries",
+                        "search": "Search:",
+                        "paginate": {
+                            "first": "First",
+                            "last": "Last",
+                            "next": "Next",
+                            "previous": "Previous"
+                        },
+                        "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+                        "infoEmpty": "Showing 0 to 0 of 0 entries",
+                        "infoFiltered": "(filtered from _MAX_ total entries)"
+                    }
+                });
+            });
+            //HANDEL ALERT HAPUS KELAS
+            function confirmDeleteKelas(id) {
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Kirimkan permintaan DELETE ke server
+                        $.ajax({
+                            url: `/kelas/${id}`, // URL sesuai route
+                            type: 'DELETE',
+                            data: {
+                                _token: $('meta[name="csrf-token"]').attr('content') // Token CSRF
+                            },
+                            success: function(response) {
+                                Swal.fire(
+                                    'Terhapus!',
+                                    response.success,
+                                    'success'
+                                ).then(() => {
+                                    // Refresh halaman atau hapus baris tabel
+                                    location.reload();
+                                });
+                            },
+                            error: function() {
+                                Swal.fire(
+                                    'Gagal!',
+                                    'Terjadi kesalahan saat menghapus data.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            }
+            //DELETE MATA KULIAH
+            function deleteMatkul(id) {
+                fetch(`/delmatkul/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Hapus elemen dari DOM
+                            document.querySelector(`#delete-form-${id}`).closest('tr').remove();
+                            alert(data.message);
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat menghapus data');
+                    });
+            }
+            document.getElementById('jadwalForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Tutup modal jika ada
+                        let modal = bootstrap.Modal.getInstance(document.querySelector('.modal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+
+                        // Tampilkan SweetAlert2 sesuai response
+                        if (data.status === 'success') {
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: data.message,
+                                icon: 'success',
+                                timerProgressBar: true,
+                                timer: 4500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                // Refresh halaman setelah alert tertutup
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message,
+                                icon: 'error',
+                                timerProgressBar: true,
+                                timer: 4500,
+                                showConfirmButton: false
+                            });
+                        }
+                    })
+                    .catch(error => {
                         Swal.fire({
-                            title: 'Berhasil!',
-                            text: 'Mata Kuliah berhasil ditambahkan',
-                            icon: 'success',
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan pada server',
+                            icon: 'error',
+                            timerProgressBar: true,
+                            timer: 5500,
+                            showConfirmButton: false
+                        });
+                    });
+            });
+
+
+            document.getElementById('mataKuliahForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const submitButton = this.querySelector('button[type="submit"]');
+
+                // Disable button saat proses submit
+                submitButton.disabled = true;
+
+                fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Reset form
+                            this.reset();
+
+                            // Alert sukses
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: 'Mata Kuliah berhasil ditambahkan',
+                                icon: 'success',
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            }).then(() => {
+                                // Refresh halaman setelah alert tertutup
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error(data.message || 'Terjadi kesalahan saat menambahkan mata kuliah');
+                        }
+                    })
+                    .catch(error => {
+                        // Alert error
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.message || 'Terjadi kesalahan pada server',
+                            icon: 'error',
                             timer: 5000,
                             timerProgressBar: true,
                             showConfirmButton: false,
@@ -644,369 +921,458 @@
                                 toast.addEventListener('mouseenter', Swal.stopTimer)
                                 toast.addEventListener('mouseleave', Swal.resumeTimer)
                             }
-                        }).then(() => {
-                            // Refresh halaman setelah alert tertutup
-                            window.location.reload();
                         });
-                    } else {
-                        throw new Error(data.message || 'Terjadi kesalahan saat menambahkan mata kuliah');
-                    }
-                })
-                .catch(error => {
-                    // Alert error
-                    Swal.fire({
-                        title: 'Error!',
-                        text: error.message || 'Terjadi kesalahan pada server',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        showConfirmButton: false,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                            toast.addEventListener('mouseleave', Swal.resumeTimer)
-                        }
+                    })
+                    .finally(() => {
+                        // Enable kembali button setelah proses selesai
+                        submitButton.disabled = false;
                     });
-                })
-                .finally(() => {
-                    // Enable kembali button setelah proses selesai
-                    submitButton.disabled = false;
-                });
-        });
+            });
+            //HANDEL MODAL EDIT MATKUL
+            function openEditModal(id, namaMatkul) {
+                // Isi input dengan nama mata kuliah yang diambil dari server
+                document.getElementById('nama-matkul').value = namaMatkul;
+                document.getElementById('matkul-id').value = id;
 
-        function openEditModal(id, namaMatkul) {
-            // Isi input dengan nama mata kuliah yang diambil dari server
-            document.getElementById('nama-matkul').value = namaMatkul;
-            document.getElementById('matkul-id').value = id;
+                // Tampilkan modal
+                var editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                editModal.show();
+            }
 
-            // Tampilkan modal
-            var editModal = new bootstrap.Modal(document.getElementById('editModal'));
-            editModal.show();
-        }
+            function updateMatkul() {
+                // Ambil data dari form
+                var formData = new FormData(document.getElementById('edit-form'));
 
-        function updateMatkul() {
-            // Ambil data dari form
-            var formData = new FormData(document.getElementById('edit-form'));
-
-            // Kirim request ke backend untuk update
-            fetch(`/mata-kuliah/${formData.get('id_mata_kuliah')}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Berhasil diperbarui, tampilkan SweetAlert sukses tanpa ikon loading
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: 'Mata kuliah berhasil diperbarui!',
-                            timer: 5000, // 5 detik
-                            timerProgressBar: true, // Menampilkan garis progress
-                            showConfirmButton: false, // Tidak menampilkan tombol konfirmasi
-                            willClose: () => {
-                                location.reload(); // Reload halaman setelah alert tertutup
-                            }
-                        });
-                    } else {
-                        // Gagal diperbarui, tampilkan SweetAlert gagal tanpa ikon loading
+                // Kirim request ke backend untuk update
+                fetch(`/mata-kuliah/${formData.get('id_mata_kuliah')}`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Berhasil diperbarui, tampilkan SweetAlert sukses tanpa ikon loading
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: 'Mata kuliah berhasil diperbarui!',
+                                timer: 5000, // 5 detik
+                                timerProgressBar: true, // Menampilkan garis progress
+                                showConfirmButton: false, // Tidak menampilkan tombol konfirmasi
+                                willClose: () => {
+                                    location.reload(); // Reload halaman setelah alert tertutup
+                                }
+                            });
+                        } else {
+                            // Gagal diperbarui, tampilkan SweetAlert gagal tanpa ikon loading
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: 'Mata kuliah gagal diperbarui. Coba lagi.',
+                                timer: 5000, // 5 detik
+                                timerProgressBar: true, // Menampilkan garis progress
+                                showConfirmButton: false, // Tidak menampilkan tombol konfirmasi
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        // Jika terjadi error (seperti kesalahan jaringan)
                         Swal.fire({
                             icon: 'error',
-                            title: 'Gagal',
-                            text: 'Mata kuliah gagal diperbarui. Coba lagi.',
+                            title: 'Error',
+                            text: 'Terjadi kesalahan. Silakan coba lagi nanti.',
                             timer: 5000, // 5 detik
                             timerProgressBar: true, // Menampilkan garis progress
                             showConfirmButton: false, // Tidak menampilkan tombol konfirmasi
                         });
-                    }
-                })
-                .catch(error => {
-                    // Jika terjadi error (seperti kesalahan jaringan)
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Terjadi kesalahan. Silakan coba lagi nanti.',
-                        timer: 5000, // 5 detik
-                        timerProgressBar: true, // Menampilkan garis progress
-                        showConfirmButton: false, // Tidak menampilkan tombol konfirmasi
+                        console.error('Error:', error);
                     });
-                    console.error('Error:', error);
-                });
-        }
-        document.getElementById('tambahTanggalForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+            }
+            //HENDEL ALERT TAMBAH TANGGAL
+            document.getElementById('tambahTanggalForm').addEventListener('submit', function(e) {
+                e.preventDefault();
 
-            let formData = new FormData(this);
+                let formData = new FormData(this);
 
-            fetch('{{ route('inserttanggal') }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
+                fetch('{{ route('inserttanggal') }}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: data.message,
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Tanggal sudah ada untuk mata kuliah ini',
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        }
+                    })
+                    .catch(error => {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: data.message,
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message || 'Terjadi kesalahan saat menambah tanggal.',
                             timer: 5000,
                             timerProgressBar: true,
                             showConfirmButton: false
-                        }).then(() => {
-                            location.reload();
                         });
-                    } else {
-                        Swal.fire({
-                            icon: 'info',
-                            title: 'Informasi',
-                            text: data.message || 'Tanggal sudah ada untuk mata kuliah ini',
-                            timer: 5000,
-                            timerProgressBar: true,
-                            showConfirmButton: false
-                        });
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message || 'Terjadi kesalahan saat menambah tanggal.',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
                     });
-                });
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            const editModal = document.getElementById('editModaltgl');
-            editModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget; // Button yang memicu modal
-                const id = button.getAttribute('data-id'); // Ambil data-id
-                const tanggal = button.getAttribute('data-tanggal'); // Ambil data-tanggal
-
-                // Isi input dengan data yang diambil
-                editModal.querySelector('#edit-id-tanggal').value = id;
-                editModal.querySelector('#edit-tanggal').value = tanggal;
             });
-        });
-        //MODAL EDIT TANGGAL
-        document.getElementById('editTanggalForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Mencegah reload halaman
+            document.addEventListener('DOMContentLoaded', function() {
+                const editModal = document.getElementById('editModaltgl');
+                editModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget; // Button yang memicu modal
+                    const id = button.getAttribute('data-id'); // Ambil data-id
+                    const tanggal = button.getAttribute('data-tanggal'); // Ambil data-tanggal
 
-            const id = document.getElementById('edit-id-tanggal').value; // Ambil ID
-            const tanggal = document.getElementById('edit-tanggal').value; // Ambil tanggal
+                    // Isi input dengan data yang diambil
+                    editModal.querySelector('#edit-id-tanggal').value = id;
+                    editModal.querySelector('#edit-tanggal').value = tanggal;
+                });
+            });
+            //MODAL EDIT TANGGAL
+            document.getElementById('editTanggalForm').addEventListener('submit', function(e) {
+                e.preventDefault(); // Mencegah reload halaman
 
-            fetch(`/updatetanggal/${id}`, { // Pastikan URL ini sesuai
-                    method: 'PUT',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        tanggal: tanggal
-                    }) // Data yang dikirim
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Berhasil!',
-                            text: data.message,
-                            icon: 'success',
-                            timer: 5000,
-                            timerProgressBar: true,
-                            showConfirmButton: false
-                        }).then(() => {
-                            location.reload(); // Refresh halaman setelah berhasil
-                        });
-                    } else {
+                const id = document.getElementById('edit-id-tanggal').value; // Ambil ID
+                const tanggal = document.getElementById('edit-tanggal').value; // Ambil tanggal
+
+                fetch(`/updatetanggal/${id}`, { // Pastikan URL ini sesuai
+                        method: 'PUT',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            tanggal: tanggal
+                        }) // Data yang dikirim
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: data.message,
+                                icon: 'success',
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload(); // Refresh halaman setelah berhasil
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message || 'Terjadi kesalahan saat mengupdate tanggal',
+                                icon: 'error',
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        }
+                    })
+                    .catch(error => {
                         Swal.fire({
                             title: 'Error!',
-                            text: data.message || 'Terjadi kesalahan saat mengupdate tanggal',
+                            text: 'Terjadi kesalahan saat mengupdate tanggal',
                             icon: 'error',
                             timer: 5000,
                             timerProgressBar: true,
                             showConfirmButton: false
                         });
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Terjadi kesalahan saat mengupdate tanggal',
-                        icon: 'error',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
                     });
-                });
-        });
+            });
 
-        document.getElementById('kelasForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Mencegah reload halaman
+            document.getElementById('kelasForm').addEventListener('submit', function(e) {
+                e.preventDefault(); // Mencegah reload halaman
 
-            const formData = new FormData(this); // Ambil data dari form
+                const formData = new FormData(this); // Ambil data dari form
 
-            fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    }
-                })
-                .then(response => {
-                    // Cek status response
-                    if (!response.ok) {
-                        return response.json().then(data => {
-                            throw new Error(data.message || 'Terjadi kesalahan pada server');
-                        });
-                    }
-                    return response.json(); // Kembalikan response dalam format JSON
-                })
-                .then(data => {
-                    if (data.success) {
+                fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        }
+                    })
+                    .then(response => {
+                        // Cek status response
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw new Error(data.message || 'Terjadi kesalahan pada server');
+                            });
+                        }
+                        return response.json(); // Kembalikan response dalam format JSON
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: data.message,
+                                icon: 'success',
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload(); // Refresh halaman setelah berhasil
+                            });
+                        }
+                    })
+                    .catch(error => {
                         Swal.fire({
-                            title: 'Berhasil!',
-                            text: data.message,
-                            icon: 'success',
+                            title: 'Error',
+                            text: error.message,
+                            icon: 'error',
                             timer: 5000,
                             timerProgressBar: true,
                             showConfirmButton: false
-                        }).then(() => {
-                            location.reload(); // Refresh halaman setelah berhasil
                         });
-                    }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        title: 'Informasi',
-                        text: error.message,
-                        icon: 'info',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
                     });
+            });
+            //HAPUS DATA JADWAL DI DALAM MODAL
+
+            function hideMataKuliahModal() {
+                document.getElementById('dynamicModal').style.display = 'none';
+            }
+            /*HAPUS PADA TABEL MATA KULIAH DAN TANGGAL*/
+            // public/js/delete-handlers.js
+            function confirmDeleteMataKuliah(id) {
+                Swal.fire({
+                    title: 'Hapus Mata Kuliah?',
+                    text: "Semua data tanggal dan jadwal terkait akan ikut terhapus!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteMataKuliah(id);
+                    }
                 });
-        });
-        //HAPUS DATA JADWAL DI DALAM MODAL
+            }
 
-        function hideMataKuliahModal() {
-            document.getElementById('dynamicModal').style.display = 'none';
-        }
-        /*HAPUS PADA TABEL MATA KULIAH DAN TANGGAL*/
-        // public/js/delete-handlers.js
-        function confirmDeleteMataKuliah(id) {
-            Swal.fire({
-                title: 'Hapus Mata Kuliah?',
-                text: "Semua data tanggal dan jadwal terkait akan ikut terhapus!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    deleteMataKuliah(id);
-                }
-            });
-        }
+            function confirmDeleteTanggal(id) {
+                Swal.fire({
+                    title: 'Hapus Tanggal?',
+                    text: "Semua data jadwal terkait akan ikut terhapus!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteTanggal(id);
+                    }
+                });
+            }
 
-        function confirmDeleteTanggal(id) {
-            Swal.fire({
-                title: 'Hapus Tanggal?',
-                text: "Semua data jadwal terkait akan ikut terhapus!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    deleteTanggal(id);
-                }
-            });
-        }
-
-        function deleteMataKuliah(id) {
-            $.ajax({
-                url: `/mata-kuliah/${id}`,
-                type: 'DELETE',
-                data: {
-                    "_token": $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
+            function deleteMataKuliah(id) {
+                $.ajax({
+                    url: `/mata-kuliah/${id}`,
+                    type: 'DELETE',
+                    data: {
+                        "_token": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire(
+                                'Terhapus!',
+                                response.message,
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Gagal!',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function(xhr) {
                         Swal.fire(
-                            'Terhapus!',
-                            response.message,
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire(
-                            'Gagal!',
-                            response.message,
+                            'Error!',
+                            'Terjadi kesalahan saat menghapus data',
                             'error'
                         );
                     }
-                },
-                error: function(xhr) {
-                    Swal.fire(
-                        'Error!',
-                        'Terjadi kesalahan saat menghapus data',
-                        'error'
-                    );
-                }
-            });
-        }
+                });
+            }
 
-        function deleteTanggal(id) {
-            $.ajax({
-                url: `/tanggal/${id}`,
-                type: 'DELETE',
-                data: {
-                    "_token": $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
+            function deleteTanggal(id) {
+                $.ajax({
+                    url: `/tanggal/${id}`,
+                    type: 'DELETE',
+                    data: {
+                        "_token": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire(
+                                'Terhapus!',
+                                response.message,
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Gagal!',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function(xhr) {
                         Swal.fire(
-                            'Terhapus!',
-                            response.message,
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire(
-                            'Gagal!',
-                            response.message,
+                            'Error!',
+                            'Terjadi kesalahan saat menghapus data',
                             'error'
                         );
                     }
-                },
-                error: function(xhr) {
-                    Swal.fire(
-                        'Error!',
-                        'Terjadi kesalahan saat menghapus data',
-                        'error'
-                    );
-                }
-            });
-        }
-    </script>
+                });
+            }
+            //HANDEL TABEL KELAS
+            document.addEventListener('DOMContentLoaded', function() {
+                let rowsPerPage = 5; // Default rows per page
+                const table = document.getElementById('kelasTable');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.getElementsByTagName('tr'));
+                const pagination = document.getElementById('pagination');
+                const searchInput = document.getElementById('searchInput');
+                const entriesSelect = document.getElementById('entriesSelect');
 
-@endsection
+                let currentPage = 1;
+                let filteredRows = [...rows]; // Filtered rows (search)
+
+                // Function to render the table
+                function renderTable() {
+                    tbody.innerHTML = '';
+                    const start = (currentPage - 1) * rowsPerPage;
+                    const end = start + rowsPerPage;
+                    const paginatedRows = filteredRows.slice(start, end);
+
+                    paginatedRows.forEach((row, index) => {
+                        const clonedRow = row.cloneNode(true);
+                        clonedRow.firstElementChild.textContent = start + index + 1; // Update row number
+                        tbody.appendChild(clonedRow);
+                    });
+                    renderPagination();
+                }
+
+                // Function to render pagination buttons
+                function renderPagination() {
+                    pagination.innerHTML = '';
+                    const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+                    // Previous Button
+                    const prevButton = document.createElement('button');
+                    prevButton.textContent = 'Previous';
+                    prevButton.classList.add('page-btn');
+                    prevButton.disabled = currentPage === 1;
+                    prevButton.addEventListener('click', () => {
+                        currentPage--;
+                        renderTable();
+                    });
+                    pagination.appendChild(prevButton);
+
+                    // Page Numbers
+                    for (let i = 1; i <= totalPages; i++) {
+                        const button = document.createElement('button');
+                        button.textContent = i;
+                        button.classList.add('page-btn');
+                        if (i === currentPage) {
+                            button.classList.add('active');
+                        }
+                        button.addEventListener('click', () => {
+                            currentPage = i;
+                            renderTable();
+                        });
+                        pagination.appendChild(button);
+                    }
+
+                    // Next Button
+                    const nextButton = document.createElement('button');
+                    nextButton.textContent = 'Next';
+                    nextButton.classList.add('page-btn');
+                    nextButton.disabled = currentPage === totalPages;
+                    nextButton.addEventListener('click', () => {
+                        currentPage++;
+                        renderTable();
+                    });
+                    pagination.appendChild(nextButton);
+                }
+
+                // Function to filter rows based on search input
+                function filterKelas() {
+                    const searchValue = searchInput.value.toLowerCase();
+                    filteredRows = rows.filter(row => {
+                        const kelasText = row.children[1].textContent.toLowerCase();
+                        return kelasText.includes(searchValue);
+                    });
+                    currentPage = 1; // Reset to first page
+                    renderTable();
+                }
+
+                // Function to handle change in entries per page
+                function changeEntries() {
+                    rowsPerPage = parseInt(entriesSelect.value, 10);
+                    currentPage = 1; // Reset to first page
+                    renderTable();
+                }
+
+                // Attach event listeners
+                searchInput.addEventListener('input', filterKelas);
+                entriesSelect.addEventListener('change', changeEntries);
+
+                // Initial rendering
+                renderTable();
+
+                // Functions for modal actions (example)
+                window.openEditModal = function(id, kelas) {
+                    alert(`Edit Kelas: ID=${id}, Nama=${kelas}`);
+                    // Your modal logic here
+                };
+
+                window.confirmDeleteKelas = function(id) {
+                    if (confirm('Apakah Anda yakin ingin menghapus kelas ini?')) {
+                        alert(`Kelas dengan ID ${id} telah dihapus`);
+                        // Your delete logic here
+                    }
+                };
+            });
+        </script>
+
+    @endsection

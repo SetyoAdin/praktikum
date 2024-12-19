@@ -162,7 +162,7 @@ class MahasiswaController extends Controller
 
         return redirect()->back()->with('success', 'Data ruangan dan penanggung jawab berhasil diperbarui.');
     }
-    public function delete(Request $request, $id)
+    public function deleteMahasiswaDanTambahKuota(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -170,39 +170,21 @@ class MahasiswaController extends Controller
             // Cari data mahasiswa berdasarkan ID
             $mahasiswa = Mahasiswa::findOrFail($id);
 
-            // Ambil ID jadwal sebelum data dihapus
-            $jadwalId = $mahasiswa->id_jadwal;
-
             // Hapus data mahasiswa
             $mahasiswa->delete();
 
-            if ($jadwalId) {
-                $jadwal = Jadwal::findOrFail($jadwalId);
-                $oldQuota = $jadwal->kuota;
-
-                // Tambah kuota
-                $jadwal->kuota += 1;
-                $jadwal->save();
-
-                // Log perubahan kuota
-                Log::info('Kuota berhasil ditambah', [
-                    'jadwal_id' => $jadwalId,
-                    'kuota_lama' => $oldQuota,
-                    'penambahan' => 1,
-                    'kuota_baru' => $jadwal->kuota
-                ]);
-            }
-
             DB::commit();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Data berhasil dihapus dan kuota berhasil ditambah'
+                'message' => 'Data mahasiswa berhasil dihapus'
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+            Log::error('Gagal menghapus mahasiswa: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus data'
+                'message' => 'Gagal menghapus data mahasiswa'
             ], 500);
         }
     }

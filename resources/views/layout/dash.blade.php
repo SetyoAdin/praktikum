@@ -335,7 +335,7 @@
 
         .table-responsive {
             width: 100%;
-            overflow-x: auto;
+            overflow-x: visible !important;
         }
 
         .table {

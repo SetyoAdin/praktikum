@@ -8,6 +8,7 @@ use App\Models\Tanggal;
 use App\Models\Matkul;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class JadwalController extends Controller
 {
@@ -57,7 +58,11 @@ class JadwalController extends Controller
                 ->first();
 
             if ($existingJadwal) {
-                throw new \Exception('Jadwal untuk tanggal dan sesi ini sudah ada.');
+                return response()->json([
+                    'status' => 'info',
+                    'message' => 'Jadwal untuk tanggal dan sesi ini sudah ada.',
+                    'alert_type' => 'info'
+                ], 200);
             }
 
             // Buat jadwal baru
@@ -73,7 +78,7 @@ class JadwalController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Jadwal berhasil ditambahkan'
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -135,5 +140,31 @@ class JadwalController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan saat menghapus data jadwal.']);
         }
+    }
+    public function delete($id)
+    {
+        $jadwal = Jadwal::find($id);
+
+        if (!$jadwal) {
+            return response()->json(['success' => false, 'message' => 'Data sesi tidak ditemukan.'], 404);
+        }
+
+        try {
+            $jadwal->delete();
+            return response()->json(['success' => true, 'message' => 'Sesi berhasil dihapus.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan saat menghapus sesi.'], 500);
+        }
+    }
+    public function destroy($id)
+    {
+        // Cari jadwal berdasarkan ID
+        $jadwal = Jadwal::findOrFail($id);
+
+        // Hapus jadwal
+        $jadwal->delete();
+
+        // Return respons kosong tanpa alert
+        return response()->noContent();
     }
 }
